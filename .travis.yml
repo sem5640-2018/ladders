@@ -1,0 +1,10 @@
+language: csharp
+solution: ladders.sln
+mono: none
+dotnet: 2.1
+
+script:
+- dotnet restore
+
+notifications:
+    slack: sem5640-2018:iSwMM5tPZh52WE5kVelricok
