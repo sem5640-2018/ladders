@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2046
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ladders", "ladders\ladders.csproj", "{2BCE6004-42F0-4143-A50A-E707BF84CBCD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2BCE6004-42F0-4143-A50A-E707BF84CBCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BCE6004-42F0-4143-A50A-E707BF84CBCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BCE6004-42F0-4143-A50A-E707BF84CBCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BCE6004-42F0-4143-A50A-E707BF84CBCD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FBF385C5-C846-4426-88DC-F38B8E485535}
+	EndGlobalSection
+EndGlobal
