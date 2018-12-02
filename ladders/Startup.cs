@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using ladders.Models;
 
 namespace ladders
 {
@@ -33,6 +35,9 @@ namespace ladders
 
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddDbContext<LaddersContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("LaddersContext")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
