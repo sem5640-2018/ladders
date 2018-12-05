@@ -51,9 +51,14 @@ namespace ladders.Controllers
         // GET: Profile/Create
         public async Task<IActionResult> Create()
         {
+            var profileModel = new ProfileModel();
             if (DoIHaveAnAccount() && !AmIAdmin())
                 return await RedirectToMyProfile();
-            return View();
+            profileModel.UserId = GetMyName();
+            profileModel.Name = User.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+            profileModel.CurrentLadder = -1;
+            profileModel.Suspended = false;
+            return View(profileModel);
         }
 
         // POST: Profile/Create
@@ -61,15 +66,9 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,UserId, Suspended, Availability,PreferredLocation")] ProfileModel profileModel)
+        public async Task<IActionResult> Create([Bind("Id,UserId,Name,Suspended,Availability,PreferredLocation")] ProfileModel profileModel)
         {
-            profileModel.UserId = GetMyName();
-            profileModel.Name = User.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
-            profileModel.CurrentLadder = -1;
-            profileModel.Suspended = false;
-
-            // TODO
-            //if (!ModelState.IsValid) return View(profileModel);
+            if (!ModelState.IsValid) return View(profileModel);
 
             _context.Add(profileModel);
             await _context.SaveChangesAsync();
@@ -79,6 +78,7 @@ namespace ladders.Controllers
         // GET: Profile/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+
             if (id == null)
             {
                 return NotFound();
@@ -89,6 +89,12 @@ namespace ladders.Controllers
             {
                 return NotFound();
             }
+
+            if (!AmIAdmin() && !profileModel.UserId.Equals(GetMyName()))
+            {
+                return NotFound();
+            }
+
             return View(profileModel);
         }
 
@@ -97,7 +103,7 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,UserId,Availability,PreferredLocation,Suspended,CurrentLadder")] ProfileModel profileModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,UserId,Availability,PreferredLocation,Suspended,CurrentLadder")] ProfileModel profileModel)
         {
             if (id != profileModel.Id)
             {
@@ -105,6 +111,11 @@ namespace ladders.Controllers
             }
 
             if (!ModelState.IsValid) return View(profileModel);
+
+            if (!AmIAdmin() && !profileModel.UserId.Equals(GetMyName()))
+            {
+                return NotFound();
+            }
 
             try
             {

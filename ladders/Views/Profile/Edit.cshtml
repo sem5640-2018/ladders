@@ -13,11 +13,10 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <input asp-for="UserId" class="form-control" />
-                <span asp-validation-for="UserId" class="text-danger"></span>
-            </div>
+            <input asp-for="UserId" type="hidden" />
+            <input asp-for="Name" type="hidden" />/>
+            <input asp-for="CurrentLadder" type="hidden" />
+
             <div class="form-group">
                 <label asp-for="Availability" class="control-label"></label>
                 <input asp-for="Availability" class="form-control" />
@@ -34,11 +33,6 @@
                         <input asp-for="Suspended" /> @Html.DisplayNameFor(model => model.Suspended)
                     </label>
                 </div>
-            </div>
-            <div class="form-group">
-                <label asp-for="CurrentLadder" class="control-label"></label>
-                <input asp-for="CurrentLadder" class="form-control" />
-                <span asp-validation-for="CurrentLadder" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />
