@@ -32,11 +32,51 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
+            var ladderModel = await _context.LadderModel.Include(ladder => ladder.MemberList)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (ladderModel == null) return NotFound();
+
+            return View(ladderModel);
+        }
+
+        // GET: Ladders/Join/5
+        public async Task<IActionResult> Join(int? id)
+        {
+            if (id == null) return NotFound();
+
             var ladderModel = await _context.LadderModel
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ladderModel == null) return NotFound();
 
             return View(ladderModel);
+        }
+
+        [ActionName("Join")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Join_Post(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var ladderModel = await _context.LadderModel
+                .Include(ladder => ladder.ApprovalUsersList)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (ladderModel == null) return NotFound();
+
+            var me = await GetMe();
+            if (me == null) return RedirectToPage("Profile", "Create");
+
+            if (IsMember(me, ladderModel))
+                return RedirectToAction(nameof(Details), new {id});
+
+            if (ladderModel.ApprovalUsersList == null)
+                ladderModel.ApprovalUsersList = new List<ProfileModel>();
+
+            ladderModel.ApprovalUsersList.Add(me);
+
+            _context.Update(ladderModel);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Details), new {id});
         }
 
         // GET: Ladders/Create
@@ -55,12 +95,14 @@ namespace ladders.Controllers
             return View(ladderModel);
         }
 
+
         // POST: Ladders/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,MemberList,CurrentRankings,ApprovalUsersList")] LadderModel ladderModel)
+        public async Task<IActionResult> Create([Bind("Id,Name,MemberList,CurrentRankings,ApprovalUsersList")]
+            LadderModel ladderModel)
         {
             if (!AmIAdmin()) return RedirectToAction(nameof(Index));
 
@@ -69,7 +111,6 @@ namespace ladders.Controllers
             _context.Add(ladderModel);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-
         }
 
         // GET: Ladders/Edit/5
@@ -89,7 +130,8 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,MemberList,CurrentRankings,ApprovalUsersList")] LadderModel ladderModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,MemberList,CurrentRankings,ApprovalUsersList")]
+            LadderModel ladderModel)
         {
             if (!AmIAdmin()) return RedirectToAction(nameof(Index));
 
@@ -176,7 +218,7 @@ namespace ladders.Controllers
 
         private static bool IsMember(ProfileModel user, LadderModel ladder)
         {
-            return ladder.MemberList.Contains(user);
+            return ladder.MemberList?.Contains(user) ?? false;
         }
 
         #endregion

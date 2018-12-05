@@ -23,11 +23,12 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
+                <a asp-action="Join" asp-route-id="@item.Id">Join</a> |
                 @if (ViewBag.IsAdmin)
                 {
                     <span>
                         <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
                     </span>
                 }
             </td>
