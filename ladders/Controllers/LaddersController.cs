@@ -54,14 +54,12 @@ namespace ladders.Controllers
         {
             if (!AmIAdmin()) return RedirectToAction(nameof(Index));
 
-            if (ModelState.IsValid)
-            {
-                _context.Add(ladderModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
+            if (!ModelState.IsValid) return View(ladderModel);
 
-            return View(ladderModel);
+            _context.Add(ladderModel);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+
         }
 
         // GET: Ladders/Edit/5
@@ -142,6 +140,11 @@ namespace ladders.Controllers
 
         #region Help Functions
 
+        private async Task<bool> AmIMember(LadderModel ladder)
+        {
+            return IsMember(await GetMe(), ladder);
+        }
+
         private string GetMyName()
         {
             return User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
@@ -153,6 +156,17 @@ namespace ladders.Controllers
             var usersGroup = User.Claims.Where(c => c.Type == "user_type");
             return usersGroup.Select(claim => claim.Value)
                 .Any(value => value.Equals("administrator") || value.Equals("coordinator"));
+        }
+
+        private async Task<ProfileModel> GetMe()
+        {
+            var name = GetMyName();
+            return await _context.ProfileModel.FirstOrDefaultAsync(e => e.UserId == name);
+        }
+
+        private static bool IsMember(ProfileModel user, LadderModel ladder)
+        {
+            return ladder.MemberList.Contains(user);
         }
 
         #endregion

@@ -11,6 +11,9 @@ namespace ladders.Models
         [Key]
         public virtual int Id { get; set; }
 
+        [Required]
+        public virtual string Name { get; set; }
+
         [MaxLength(200)]
         [Required]
         public virtual ICollection<ProfileModel> MemberList { get; set; }
