@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ladders.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -22,6 +23,7 @@ namespace ladders.Controllers
         // GET: Ladders
         public async Task<IActionResult> Index()
         {
+            ViewBag.IsAdmin = AmIAdmin();
             return View(await _context.LadderModel.ToListAsync());
         }
 
@@ -42,7 +44,15 @@ namespace ladders.Controllers
         {
             if (!AmIAdmin()) return RedirectToAction(nameof(Index));
 
-            return View();
+            var ladderModel = new LadderModel
+            {
+                MemberList = new List<ProfileModel>(),
+                CurrentRankings = new List<Ranking>(),
+                ApprovalUsersList = new List<ProfileModel>()
+            };
+
+
+            return View(ladderModel);
         }
 
         // POST: Ladders/Create
@@ -50,7 +60,7 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id")] LadderModel ladderModel)
+        public async Task<IActionResult> Create([Bind("Id,Name,MemberList,CurrentRankings,ApprovalUsersList")] LadderModel ladderModel)
         {
             if (!AmIAdmin()) return RedirectToAction(nameof(Index));
 
@@ -79,7 +89,7 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id")] LadderModel ladderModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,MemberList,CurrentRankings,ApprovalUsersList")] LadderModel ladderModel)
         {
             if (!AmIAdmin()) return RedirectToAction(nameof(Index));
 
