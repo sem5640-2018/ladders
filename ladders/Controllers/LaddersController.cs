@@ -118,8 +118,12 @@ namespace ladders.Controllers
             ladderModel.ApprovalUsersList.Remove(user);
 
             if (add)
+            {
                 ladderModel.MemberList.Add(user);
+                user.CurrentLadder = ladderModel.Id;
+            }
 
+            _context.Update(user);
             _context.Update(ladderModel);
             await _context.SaveChangesAsync();
 
