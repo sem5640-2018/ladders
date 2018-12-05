@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ladders.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ladders.Controllers
 {
+    [Authorize]
     public class ProfileController : Controller
     {
         private readonly LaddersContext _context;
@@ -21,6 +24,9 @@ namespace ladders.Controllers
         // GET: Profile
         public async Task<IActionResult> Index()
         {
+            ViewBag.IsAdmin = AmIAdmin();
+            ViewBag.ID = GetMyName();
+
             return View(await _context.ProfileModel.ToListAsync());
         }
 
@@ -43,8 +49,10 @@ namespace ladders.Controllers
         }
 
         // GET: Profile/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            if (DoIHaveAnAccount() && !AmIAdmin())
+                return await RedirectToMyProfile();
             return View();
         }
 
@@ -53,15 +61,19 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,UserId,Availability,PreferredLocation,Suspended,CurrentLadder")] ProfileModel profileModel)
+        public async Task<IActionResult> Create([Bind("Id,UserId, Suspended, Availability,PreferredLocation")] ProfileModel profileModel)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(profileModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(profileModel);
+            profileModel.UserId = GetMyName();
+            profileModel.Name = User.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+            profileModel.CurrentLadder = -1;
+            profileModel.Suspended = false;
+
+            // TODO
+            //if (!ModelState.IsValid) return View(profileModel);
+
+            _context.Add(profileModel);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Profile/Edit/5
@@ -92,27 +104,23 @@ namespace ladders.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(profileModel);
+
+            try
             {
-                try
-                {
-                    _context.Update(profileModel);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProfileModelExists(profileModel.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                _context.Update(profileModel);
+                await _context.SaveChangesAsync();
             }
-            return View(profileModel);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ProfileModelExists(profileModel.Id))
+                {
+                    return NotFound();
+                }
+
+                throw;
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Profile/Delete/5
@@ -144,9 +152,37 @@ namespace ladders.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+        // Helper Functions
+
         private bool ProfileModelExists(int id)
         {
             return _context.ProfileModel.Any(e => e.Id == id);
+        }
+
+        private async Task<IActionResult> RedirectToMyProfile()
+        {
+            var userId = GetMyName();
+            var account  = await _context.ProfileModel.FirstOrDefaultAsync(e => e.UserId == userId);
+            return account == null ? RedirectToAction("Index", "Ladders") : RedirectToAction("Details", new {id = account.Id});
+        }
+
+        private string GetMyName()
+        {
+            return User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        }
+
+        private bool DoIHaveAnAccount()
+        {
+            var userId = GetMyName();
+
+            return _context.ProfileModel.Any(e => e.UserId == userId);
+        }
+
+        private bool AmIAdmin()
+        {
+            var usersGroup = User.Claims.Where(c => c.Type == "user_type");
+            return usersGroup.Select(claim => claim.Value).Any(value => value.Equals("administrator") || value.Equals("coordinator"));
         }
     }
 }
