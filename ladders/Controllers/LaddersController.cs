@@ -79,6 +79,54 @@ namespace ladders.Controllers
             return RedirectToAction(nameof(Details), new {id});
         }
 
+        // GET: Ladders/Approval/5
+        public async Task<IActionResult> Approval(int? id)
+        {
+            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+
+            if (id == null) return NotFound();
+
+            var ladderModel = await _context.LadderModel
+                .Include(m => m.ApprovalUsersList)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (ladderModel == null) return NotFound();
+
+            return View(ladderModel);
+        }
+
+        [ActionName("Approval")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        // GET: Ladders/Approval/5
+        public async Task<IActionResult> Approval(int? id, string userId, bool add)
+        {
+            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+
+            if (id == null || userId == null) return NotFound();
+
+            var ladderModel = await _context.LadderModel
+                .Include(m => m.ApprovalUsersList)
+                .Include(l => l.MemberList)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            var user = await _context.ProfileModel.FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (ladderModel == null || user == null) return NotFound();
+
+            if (!ladderModel.ApprovalUsersList.Contains(user))
+                return View(ladderModel);
+
+            ladderModel.ApprovalUsersList.Remove(user);
+
+            if (add)
+                ladderModel.MemberList.Add(user);
+
+            _context.Update(ladderModel);
+            await _context.SaveChangesAsync();
+
+            return View(ladderModel);
+        }
+
+
         // GET: Ladders/Create
         public IActionResult Create()
         {
