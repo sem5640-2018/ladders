@@ -126,6 +126,11 @@ namespace ladders.Controllers
         // GET: Profile/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+            if (!AmIAdmin())
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
             if (id == null)
             {
                 return NotFound();
@@ -146,13 +151,17 @@ namespace ladders.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (!AmIAdmin())
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
             var profileModel = await _context.ProfileModel.FindAsync(id);
             _context.ProfileModel.Remove(profileModel);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
-
+        
         // Helper Functions
 
         private bool ProfileModelExists(int id)
