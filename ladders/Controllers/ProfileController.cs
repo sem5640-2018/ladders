@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using ladders.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ladders.Controllers
 {
@@ -21,6 +17,8 @@ namespace ladders.Controllers
             _context = context;
         }
 
+        #region User Requests
+       
         // GET: Profile
         public async Task<IActionResult> Index()
         {
@@ -33,17 +31,11 @@ namespace ladders.Controllers
         // GET: Profile/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var profileModel = await _context.ProfileModel
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (profileModel == null)
-            {
-                return NotFound();
-            }
+            if (profileModel == null) return NotFound();
 
             return View(profileModel);
         }
@@ -54,6 +46,7 @@ namespace ladders.Controllers
             var profileModel = new ProfileModel();
             if (DoIHaveAnAccount() && !AmIAdmin())
                 return await RedirectToMyProfile();
+
             profileModel.UserId = GetMyName();
             profileModel.Name = User.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
             profileModel.CurrentLadder = -1;
@@ -66,7 +59,8 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,UserId,Name,Suspended,Availability,PreferredLocation")] ProfileModel profileModel)
+        public async Task<IActionResult> Create([Bind("Id,UserId,Name,Suspended,Availability,PreferredLocation")]
+            ProfileModel profileModel)
         {
             if (!ModelState.IsValid) return View(profileModel);
 
@@ -78,22 +72,12 @@ namespace ladders.Controllers
         // GET: Profile/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var profileModel = await _context.ProfileModel.FindAsync(id);
-            if (profileModel == null)
-            {
-                return NotFound();
-            }
+            if (profileModel == null) return NotFound();
 
-            if (!AmIAdmin() && !profileModel.UserId.Equals(GetMyName()))
-            {
-                return NotFound();
-            }
+            if (!AmIAdmin() && !profileModel.UserId.Equals(GetMyName())) return NotFound();
 
             return View(profileModel);
         }
@@ -103,19 +87,15 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,UserId,Availability,PreferredLocation,Suspended,CurrentLadder")] ProfileModel profileModel)
+        public async Task<IActionResult> Edit(int id,
+            [Bind("Id,Name,UserId,Availability,PreferredLocation,Suspended,CurrentLadder")]
+            ProfileModel profileModel)
         {
-            if (id != profileModel.Id)
-            {
-                return NotFound();
-            }
+            if (id != profileModel.Id) return NotFound();
 
             if (!ModelState.IsValid) return View(profileModel);
 
-            if (!AmIAdmin() && !profileModel.UserId.Equals(GetMyName()))
-            {
-                return NotFound();
-            }
+            if (!AmIAdmin() && !profileModel.UserId.Equals(GetMyName())) return NotFound();
 
             try
             {
@@ -124,56 +104,45 @@ namespace ladders.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ProfileModelExists(profileModel.Id))
-                {
-                    return NotFound();
-                }
+                if (!ProfileModelExists(profileModel.Id)) return NotFound();
 
                 throw;
             }
+
             return RedirectToAction(nameof(Index));
         }
 
         // GET: Profile/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (!AmIAdmin())
-            {
-                return RedirectToAction(nameof(Index));
-            }
+            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
 
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var profileModel = await _context.ProfileModel
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (profileModel == null)
-            {
-                return NotFound();
-            }
+            if (profileModel == null) return NotFound();
 
             return View(profileModel);
         }
 
         // POST: Profile/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
+        [ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (!AmIAdmin())
-            {
-                return RedirectToAction(nameof(Index));
-            }
+            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
 
             var profileModel = await _context.ProfileModel.FindAsync(id);
             _context.ProfileModel.Remove(profileModel);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-        
-        // Helper Functions
+
+        #endregion
+
+        #region Helper Functions
 
         private bool ProfileModelExists(int id)
         {
@@ -183,8 +152,10 @@ namespace ladders.Controllers
         private async Task<IActionResult> RedirectToMyProfile()
         {
             var userId = GetMyName();
-            var account  = await _context.ProfileModel.FirstOrDefaultAsync(e => e.UserId == userId);
-            return account == null ? RedirectToAction("Index", "Ladders") : RedirectToAction("Details", new {id = account.Id});
+            var account = await _context.ProfileModel.FirstOrDefaultAsync(e => e.UserId == userId);
+            return account == null
+                ? RedirectToAction("Index", "Ladders")
+                : RedirectToAction("Details", new {id = account.Id});
         }
 
         private string GetMyName()
@@ -202,7 +173,10 @@ namespace ladders.Controllers
         private bool AmIAdmin()
         {
             var usersGroup = User.Claims.Where(c => c.Type == "user_type");
-            return usersGroup.Select(claim => claim.Value).Any(value => value.Equals("administrator") || value.Equals("coordinator"));
+            return usersGroup.Select(claim => claim.Value)
+                .Any(value => value.Equals("administrator") || value.Equals("coordinator"));
         }
+
+        #endregion
     }
 }

@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using ladders.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ladders.Controllers
 {
+    [Authorize]
     public class LaddersController : Controller
     {
         private readonly LaddersContext _context;
@@ -19,7 +17,8 @@ namespace ladders.Controllers
             _context = context;
         }
 
-        [Authorize]
+        #region User Interaction
+
         // GET: Ladders
         public async Task<IActionResult> Index()
         {
@@ -29,17 +28,11 @@ namespace ladders.Controllers
         // GET: Ladders/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var ladderModel = await _context.LadderModel
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (ladderModel == null)
-            {
-                return NotFound();
-            }
+            if (ladderModel == null) return NotFound();
 
             return View(ladderModel);
         }
@@ -47,6 +40,8 @@ namespace ladders.Controllers
         // GET: Ladders/Create
         public IActionResult Create()
         {
+            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+
             return View();
         }
 
@@ -57,28 +52,27 @@ namespace ladders.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id")] LadderModel ladderModel)
         {
+            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+
             if (ModelState.IsValid)
             {
                 _context.Add(ladderModel);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             return View(ladderModel);
         }
 
         // GET: Ladders/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+
+            if (id == null) return NotFound();
 
             var ladderModel = await _context.LadderModel.FindAsync(id);
-            if (ladderModel == null)
-            {
-                return NotFound();
-            }
+            if (ladderModel == null) return NotFound();
             return View(ladderModel);
         }
 
@@ -89,60 +83,53 @@ namespace ladders.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id")] LadderModel ladderModel)
         {
-            if (id != ladderModel.Id)
+            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+
+            if (id != ladderModel.Id) return NotFound();
+
+            if (!ModelState.IsValid) return View(ladderModel);
+
+            try
             {
-                return NotFound();
+                _context.Update(ladderModel);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!LadderModelExists(ladderModel.Id))
+                    return NotFound();
+                throw;
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(ladderModel);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!LadderModelExists(ladderModel.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(ladderModel);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Ladders/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+
+            if (id == null) return NotFound();
 
             var ladderModel = await _context.LadderModel
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (ladderModel == null)
-            {
-                return NotFound();
-            }
+            if (ladderModel == null) return NotFound();
 
             return View(ladderModel);
         }
 
         // POST: Ladders/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
+        [ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+
             var ladderModel = await _context.LadderModel.FindAsync(id);
             _context.LadderModel.Remove(ladderModel);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -150,5 +137,24 @@ namespace ladders.Controllers
         {
             return _context.LadderModel.Any(e => e.Id == id);
         }
+
+        #endregion
+
+        #region Help Functions
+
+        private string GetMyName()
+        {
+            return User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        }
+
+
+        private bool AmIAdmin()
+        {
+            var usersGroup = User.Claims.Where(c => c.Type == "user_type");
+            return usersGroup.Select(claim => claim.Value)
+                .Any(value => value.Equals("administrator") || value.Equals("coordinator"));
+        }
+
+        #endregion
     }
 }
