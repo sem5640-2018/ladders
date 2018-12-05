@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ladders.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ladders.Controllers
 {
@@ -18,6 +19,7 @@ namespace ladders.Controllers
             _context = context;
         }
 
+        [Authorize]
         // GET: Ladders
         public async Task<IActionResult> Index()
         {

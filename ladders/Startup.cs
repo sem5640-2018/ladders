@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using ladders.Models;
+using Microsoft.AspNetCore.Authentication;
 
 namespace ladders
 {
@@ -32,6 +34,30 @@ namespace ladders
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
+
+            var appConfig = Configuration.GetSection("ladders");
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = "Cookies";
+                    options.DefaultChallengeScheme = "oidc";
+                })
+                .AddCookie("Cookies")
+                .AddOpenIdConnect("oidc", options =>
+                {
+                    options.SignInScheme = "Cookies";
+                    options.Authority = appConfig.GetValue<string>("GatekeeperUrl");
+                    options.ClientId = appConfig.GetValue<string>("ClientId");
+                    options.ClientSecret = appConfig.GetValue<string>("ClientSecret");
+                    options.ResponseType = "code id_token";
+                    options.SaveTokens = true;
+                    options.GetClaimsFromUserInfoEndpoint = true;
+                    options.Scope.Add("profile");
+                    options.Scope.Add("offline_access");
+                    options.ClaimActions.MapJsonKey("locale", "locale");
+                    options.ClaimActions.MapJsonKey("user_type", "user_type");
+                });
 
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
@@ -56,6 +82,7 @@ namespace ladders
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
+            app.UseAuthentication();
 
             app.UseMvc(routes =>
             {
