@@ -13,12 +13,12 @@ namespace ladders.Models
 
         [MaxLength(200)]
         [Required]
-        public virtual List<ProfileModel> MemberList { get; set; }
+        public virtual ICollection<ProfileModel> MemberList { get; set; }
 
         [Required]
-        public virtual List<Ranking> CurrentRankings { get; set; }
+        public virtual ICollection<Ranking> CurrentRankings { get; set; }
 
         [Required]
-        public virtual List<ProfileModel> ApprovalUsersList { get; set; }
+        public virtual ICollection<ProfileModel> ApprovalUsersList { get; set; }
     }
 }

@@ -9,22 +9,22 @@ using ladders.Models;
 
 namespace ladders.Controllers
 {
-    public class ProfilesController : Controller
+    public class LaddersController : Controller
     {
         private readonly LaddersContext _context;
 
-        public ProfilesController(LaddersContext context)
+        public LaddersController(LaddersContext context)
         {
             _context = context;
         }
 
-        // GET: Profiles
+        // GET: Ladders
         public async Task<IActionResult> Index()
         {
-            return View(await _context.ProfileModel.ToListAsync());
+            return View(await _context.LadderModel.ToListAsync());
         }
 
-        // GET: Profiles/Details/5
+        // GET: Ladders/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -32,36 +32,39 @@ namespace ladders.Controllers
                 return NotFound();
             }
 
-            var profileModel = await _context.ProfileModel
+            var ladderModel = await _context.LadderModel
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (profileModel == null)
+            if (ladderModel == null)
             {
                 return NotFound();
             }
 
-            return View(profileModel);
+            return View(ladderModel);
         }
 
-        // GET: Profiles/Create
+        // GET: Ladders/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Profiles/Create
+        // POST: Ladders/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,UserId,Availability,PreferredLocation,Suspended")] ProfileModel profileModel)
+        public async Task<IActionResult> Create([Bind("Id")] LadderModel ladderModel)
         {
-            if (!ModelState.IsValid) return View(profileModel);
-            _context.Add(profileModel);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            if (ModelState.IsValid)
+            {
+                _context.Add(ladderModel);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(ladderModel);
         }
 
-        // GET: Profiles/Edit/5
+        // GET: Ladders/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -69,22 +72,22 @@ namespace ladders.Controllers
                 return NotFound();
             }
 
-            var profileModel = await _context.ProfileModel.FindAsync(id);
-            if (profileModel == null)
+            var ladderModel = await _context.LadderModel.FindAsync(id);
+            if (ladderModel == null)
             {
                 return NotFound();
             }
-            return View(profileModel);
+            return View(ladderModel);
         }
 
-        // POST: Profiles/Edit/5
+        // POST: Ladders/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,UserId,Availability,PreferredLocation,Suspended")] ProfileModel profileModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id")] LadderModel ladderModel)
         {
-            if (id != profileModel.Id)
+            if (id != ladderModel.Id)
             {
                 return NotFound();
             }
@@ -93,12 +96,12 @@ namespace ladders.Controllers
             {
                 try
                 {
-                    _context.Update(profileModel);
+                    _context.Update(ladderModel);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProfileModelExists(profileModel.Id))
+                    if (!LadderModelExists(ladderModel.Id))
                     {
                         return NotFound();
                     }
@@ -109,10 +112,10 @@ namespace ladders.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(profileModel);
+            return View(ladderModel);
         }
 
-        // GET: Profiles/Delete/5
+        // GET: Ladders/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -120,30 +123,30 @@ namespace ladders.Controllers
                 return NotFound();
             }
 
-            var profileModel = await _context.ProfileModel
+            var ladderModel = await _context.LadderModel
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (profileModel == null)
+            if (ladderModel == null)
             {
                 return NotFound();
             }
 
-            return View(profileModel);
+            return View(ladderModel);
         }
 
-        // POST: Profiles/Delete/5
+        // POST: Ladders/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var profileModel = await _context.ProfileModel.FindAsync(id);
-            _context.ProfileModel.Remove(profileModel);
+            var ladderModel = await _context.LadderModel.FindAsync(id);
+            _context.LadderModel.Remove(ladderModel);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProfileModelExists(int id)
+        private bool LadderModelExists(int id)
         {
-            return _context.ProfileModel.Any(e => e.Id == id);
+            return _context.LadderModel.Any(e => e.Id == id);
         }
     }
 }

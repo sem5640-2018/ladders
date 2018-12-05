@@ -24,6 +24,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Suspended)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CurrentLadder)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -41,6 +44,9 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Suspended)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CurrentLadder)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

@@ -24,6 +24,6 @@ namespace ladders.Models
         [Required]
         public virtual bool Suspended { get; set; }
 
-        public virtual LadderModel CurrentLadder { get; set; }
+        public virtual int CurrentLadder { get; set; }
     }
 }
