@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -9,6 +10,9 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using ladders.Models;
+using Microsoft.AspNetCore.Authentication;
 
 namespace ladders
 {
@@ -31,8 +35,42 @@ namespace ladders
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            var appConfig = Configuration.GetSection("ladders");
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = "Cookies";
+                    options.DefaultChallengeScheme = "oidc";
+                })
+                .AddCookie("Cookies")
+                .AddOpenIdConnect("oidc", options =>
+                {
+                    options.SignInScheme = "Cookies";
+                    options.Authority = appConfig.GetValue<string>("GatekeeperUrl");
+                    options.ClientId = appConfig.GetValue<string>("ClientId");
+                    options.ClientSecret = appConfig.GetValue<string>("ClientSecret");
+                    options.ResponseType = "code id_token";
+                    options.SaveTokens = true;
+                    options.GetClaimsFromUserInfoEndpoint = true;
+                    options.Scope.Add("profile");
+                    options.Scope.Add("offline_access");
+                    options.ClaimActions.MapJsonKey("locale", "locale");
+                    options.ClaimActions.MapJsonKey("user_type", "user_type");
+                });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Administrator", pb => pb.RequireClaim("user_type", "administrator"));
+
+                // Coordinator policy allows both Coordinators and Administrators
+                options.AddPolicy("Coordinator", pb => pb.RequireClaim("user_type", new[] { "administrator", "coordinator" }));
+            });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddDbContext<LaddersContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("LaddersContext")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +89,7 @@ namespace ladders
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
+            app.UseAuthentication();
 
             app.UseMvc(routes =>
             {

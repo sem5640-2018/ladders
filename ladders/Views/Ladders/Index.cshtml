@@ -1,0 +1,38 @@
+﻿@model IEnumerable<LadderModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                <a asp-action="Join" asp-route-id="@item.Id">Join</a> |
+                @if (ViewBag.IsAdmin)
+                {
+                    <span>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    </span>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
