@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using ladders.Models;
+using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,12 +19,12 @@ namespace ladders.Controllers
         }
 
         #region User Requests
-       
+
         // GET: Profile
         public async Task<IActionResult> Index()
         {
-            ViewBag.IsAdmin = AmIAdmin();
-            ViewBag.ID = GetMyName();
+            ViewBag.IsAdmin = Helpers.AmIAdmin(User);
+            ViewBag.ID = Helpers.GetMyName(User);
 
             return View(await _context.ProfileModel.ToListAsync());
         }
@@ -44,10 +45,10 @@ namespace ladders.Controllers
         public async Task<IActionResult> Create()
         {
             var profileModel = new ProfileModel();
-            if (DoIHaveAnAccount() && !AmIAdmin())
+            if (Helpers.DoIHaveAnAccount(User, _context) && !Helpers.AmIAdmin(User))
                 return await RedirectToMyProfile();
 
-            profileModel.UserId = GetMyName();
+            profileModel.UserId = Helpers.GetMyName(User);
             profileModel.Name = User.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
             profileModel.CurrentLadder = -1;
             profileModel.Suspended = false;
@@ -77,7 +78,7 @@ namespace ladders.Controllers
             var profileModel = await _context.ProfileModel.FindAsync(id);
             if (profileModel == null) return NotFound();
 
-            if (!AmIAdmin() && !profileModel.UserId.Equals(GetMyName())) return NotFound();
+            if (!Helpers.AmIAdmin(User) && !profileModel.UserId.Equals(Helpers.GetMyName(User))) return NotFound();
 
             return View(profileModel);
         }
@@ -95,7 +96,7 @@ namespace ladders.Controllers
 
             if (!ModelState.IsValid) return View(profileModel);
 
-            if (!AmIAdmin() && !profileModel.UserId.Equals(GetMyName())) return NotFound();
+            if (!Helpers.AmIAdmin(User) && !profileModel.UserId.Equals(Helpers.GetMyName(User))) return NotFound();
 
             try
             {
@@ -115,7 +116,7 @@ namespace ladders.Controllers
         // GET: Profile/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
             if (id == null) return NotFound();
 
@@ -132,7 +133,7 @@ namespace ladders.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
             var profileModel = await _context.ProfileModel.FindAsync(id);
             _context.ProfileModel.Remove(profileModel);
@@ -151,30 +152,11 @@ namespace ladders.Controllers
 
         private async Task<IActionResult> RedirectToMyProfile()
         {
-            var userId = GetMyName();
+            var userId = Helpers.GetMyName(User);
             var account = await _context.ProfileModel.FirstOrDefaultAsync(e => e.UserId == userId);
             return account == null
                 ? RedirectToAction("Index", "Ladders")
                 : RedirectToAction("Details", new {id = account.Id});
-        }
-
-        private string GetMyName()
-        {
-            return User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-        }
-
-        private bool DoIHaveAnAccount()
-        {
-            var userId = GetMyName();
-
-            return _context.ProfileModel.Any(e => e.UserId == userId);
-        }
-
-        private bool AmIAdmin()
-        {
-            var usersGroup = User.Claims.Where(c => c.Type == "user_type");
-            return usersGroup.Select(claim => claim.Value)
-                .Any(value => value.Equals("administrator") || value.Equals("coordinator"));
         }
 
         #endregion

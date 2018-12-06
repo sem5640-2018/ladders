@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using ladders.Models;
+using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,7 @@ namespace ladders.Controllers
         // GET: Ladders
         public async Task<IActionResult> Index()
         {
-            ViewBag.IsAdmin = AmIAdmin();
+            ViewBag.IsAdmin = Helpers.AmIAdmin(User);
             return View(await _context.LadderModel.ToListAsync());
         }
 
@@ -63,7 +64,7 @@ namespace ladders.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ladderModel == null) return NotFound();
 
-            var me = await GetMe();
+            var me = await Helpers.GetMe(User, _context);
             if (me == null) return RedirectToPage("Profile", "Create");
 
             if (IsMember(me, ladderModel))
@@ -82,7 +83,7 @@ namespace ladders.Controllers
         // GET: Ladders/Approval/5
         public async Task<IActionResult> Approval(int? id)
         {
-            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
             if (id == null) return NotFound();
 
@@ -97,10 +98,10 @@ namespace ladders.Controllers
         [ActionName("Approval")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // GET: Ladders/Approval/5
+        // POST: Ladders/Approval/5
         public async Task<IActionResult> Approval(int? id, string userId, bool add)
         {
-            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
             if (id == null || userId == null) return NotFound();
 
@@ -134,7 +135,7 @@ namespace ladders.Controllers
         // GET: Ladders/Create
         public IActionResult Create()
         {
-            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
             var ladderModel = new LadderModel
             {
@@ -156,8 +157,7 @@ namespace ladders.Controllers
         public async Task<IActionResult> Create([Bind("Id,Name,MemberList,CurrentRankings,ApprovalUsersList")]
             LadderModel ladderModel)
         {
-            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
-
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
             if (!ModelState.IsValid) return View(ladderModel);
 
             _context.Add(ladderModel);
@@ -168,7 +168,7 @@ namespace ladders.Controllers
         // GET: Ladders/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
             if (id == null) return NotFound();
 
@@ -185,7 +185,7 @@ namespace ladders.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,MemberList,CurrentRankings,ApprovalUsersList")]
             LadderModel ladderModel)
         {
-            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
             if (id != ladderModel.Id) return NotFound();
 
@@ -209,7 +209,7 @@ namespace ladders.Controllers
         // GET: Ladders/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
             if (id == null) return NotFound();
 
@@ -226,7 +226,7 @@ namespace ladders.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (!AmIAdmin()) return RedirectToAction(nameof(Index));
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
             var ladderModel = await _context.LadderModel.FindAsync(id);
             _context.LadderModel.Remove(ladderModel);
@@ -246,27 +246,9 @@ namespace ladders.Controllers
 
         private async Task<bool> AmIMember(LadderModel ladder)
         {
-            return IsMember(await GetMe(), ladder);
+            return IsMember(await Helpers.GetMe(User, _context), ladder);
         }
 
-        private string GetMyName()
-        {
-            return User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-        }
-
-
-        private bool AmIAdmin()
-        {
-            var usersGroup = User.Claims.Where(c => c.Type == "user_type");
-            return usersGroup.Select(claim => claim.Value)
-                .Any(value => value.Equals("administrator") || value.Equals("coordinator"));
-        }
-
-        private async Task<ProfileModel> GetMe()
-        {
-            var name = GetMyName();
-            return await _context.ProfileModel.FirstOrDefaultAsync(e => e.UserId == name);
-        }
 
         private static bool IsMember(ProfileModel user, LadderModel ladder)
         {
