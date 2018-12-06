@@ -1,66 +1,69 @@
 ﻿@model IEnumerable<ProfileModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Users";
 }
 
-<h2>Index</h2>
+<h2>Users</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+@if (ViewBag.IsAdmin || !ViewBag.HaveAccount)
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+}
 <table class="table">
     <thead>
-    <tr>
-        <th>
-            Email
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Availability)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.PreferredLocation)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Suspended)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.CurrentLadder)
-        </th>
-        <th></th>
-    </tr>
+        <tr>
+            <th>
+                Email
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Availability)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PreferredLocation)
+            </th>
+            <th>
+                Available
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CurrentLadder)
+            </th>
+            <th></th>
+        </tr>
     </thead>
     <tbody>
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Availability)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PreferredLocation)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Suspended)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CurrentLadder)
-            </td>
-            <td>
-                @if (ViewBag.IsAdmin || ViewBag.ID?.Equals(item.UserId))
-                {
-                    <span><a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |</span>
-                }
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a>
-                @if (ViewBag.IsAdmin)
-                {
-                    <span> | <a asp-action="Delete" asp-route-id="@item.Id">Delete</a></span>
-                }
-            </td>
-        </tr>
-    }
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Availability)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PreferredLocation)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Suspended)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CurrentLadder)
+                </td>
+                <td>
+                    @if (ViewBag.IsAdmin || ViewBag.ID?.Equals(item.UserId))
+                    {
+                        <span><a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |</span>
+                    }
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    @if (ViewBag.IsAdmin)
+                    {
+                        <span> | <a asp-action="Delete" asp-route-id="@item.Id">Delete</a></span>
+                    }
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

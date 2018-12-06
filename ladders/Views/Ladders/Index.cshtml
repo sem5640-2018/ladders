@@ -23,7 +23,13 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                <a asp-action="Join" asp-route-id="@item.Id">Join</a> |
+                
+                @if (ViewBag.User?.CurrentLadder != item.Id)
+                {
+                    <span>
+                        <a asp-action="Join" asp-route-id="@item.Id">Join</a> |
+                    </span>
+                }
                 @if (ViewBag.IsAdmin)
                 {
                     <span>

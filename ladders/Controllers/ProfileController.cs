@@ -25,6 +25,7 @@ namespace ladders.Controllers
         {
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
             ViewBag.ID = Helpers.GetMyName(User);
+            ViewBag.HaveAccount = Helpers.DoIHaveAnAccount(User, _context);
 
             return View(await _context.ProfileModel.ToListAsync());
         }

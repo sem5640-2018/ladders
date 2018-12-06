@@ -25,6 +25,7 @@ namespace ladders.Controllers
         public async Task<IActionResult> Index()
         {
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
+            ViewBag.User = await Helpers.GetMe(User, _context);
             return View(await _context.LadderModel.ToListAsync());
         }
 
@@ -172,7 +173,12 @@ namespace ladders.Controllers
 
             if (id == null) return NotFound();
 
-            var ladderModel = await _context.LadderModel.FindAsync(id);
+            var ladderModel = await _context.LadderModel
+                .Include(m => m.ApprovalUsersList)
+                .Include(l => l.MemberList)
+                .Include(o => o.CurrentRankings)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (ladderModel == null) return NotFound();
             return View(ladderModel);
         }
@@ -230,6 +236,46 @@ namespace ladders.Controllers
 
             var ladderModel = await _context.LadderModel.FindAsync(id);
             _context.LadderModel.Remove(ladderModel);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> RemoveUser(int? id)
+        {
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
+
+            if (id == null) return NotFound();
+
+            var user = await _context.ProfileModel.FindAsync(id);
+            if (user == null) return NotFound();
+            return View(user);
+        }
+
+        // POST: Ladders/Delete/5
+        [HttpPost]
+        [ActionName("RemoveUser")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveUserConfirmed(int id)
+        {
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
+
+            var user = await _context.ProfileModel.FindAsync(id);
+            if (user.CurrentLadder < 1)
+                return RedirectToAction(nameof(Index));
+
+            var ladderModel = await _context.LadderModel
+                .Include(l => l.MemberList)
+                .FirstOrDefaultAsync(m => m.Id == user.CurrentLadder);
+
+            if (ladderModel == null)
+                return NotFound();
+
+            ladderModel.MemberList.Remove(user);
+            user.CurrentLadder = 0;
+
+            _context.ProfileModel.Update(user);
+            _context.LadderModel.Update(ladderModel);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
