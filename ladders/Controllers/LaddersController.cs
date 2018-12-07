@@ -37,6 +37,7 @@ namespace ladders.Controllers
             var ladderModel = await _context.LadderModel.Include(ladder => ladder.MemberList)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ladderModel == null) return NotFound();
+            ViewBag.IsAdmin = Helpers.AmIAdmin(User);
 
             return View(ladderModel);
         }
@@ -75,7 +76,9 @@ namespace ladders.Controllers
                 ladderModel.ApprovalUsersList = new List<ProfileModel>();
 
             ladderModel.ApprovalUsersList.Add(me);
+            me.ApprovalLadder = ladderModel;
 
+            _context.Update(me);
             _context.Update(ladderModel);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Details), new {id});
@@ -110,7 +113,7 @@ namespace ladders.Controllers
                 .Include(m => m.ApprovalUsersList)
                 .Include(l => l.MemberList)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            var user = await _context.ProfileModel.FirstOrDefaultAsync(u => u.UserId == userId);
+            var user = await _context.ProfileModel.Include(u => u.ApprovalLadder).Include(p => p.CurrentLadder).FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (ladderModel == null || user == null) return NotFound();
 
@@ -118,11 +121,12 @@ namespace ladders.Controllers
                 return View(ladderModel);
 
             ladderModel.ApprovalUsersList.Remove(user);
+            user.ApprovalLadder = null;
 
             if (add)
             {
                 ladderModel.MemberList.Add(user);
-                user.CurrentLadder = ladderModel.Id;
+                user.CurrentLadder = ladderModel;
             }
 
             _context.Update(user);
@@ -261,18 +265,16 @@ namespace ladders.Controllers
             if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
             var user = await _context.ProfileModel.FindAsync(id);
-            if (user.CurrentLadder < 1)
+            if (user.CurrentLadder == null)
                 return RedirectToAction(nameof(Index));
 
-            var ladderModel = await _context.LadderModel
-                .Include(l => l.MemberList)
-                .FirstOrDefaultAsync(m => m.Id == user.CurrentLadder);
+            var ladderModel = user.CurrentLadder;
 
             if (ladderModel == null)
                 return NotFound();
 
             ladderModel.MemberList.Remove(user);
-            user.CurrentLadder = 0;
+            user.CurrentLadder = null;
 
             _context.ProfileModel.Update(user);
             _context.LadderModel.Update(ladderModel);

@@ -18,22 +18,22 @@
     <tbody>
     @foreach (var item in Model)
     {
-        <tr>
+        <tr onclick="@("window.location.href='" + @Url.Action("Details","Ladders", new{id =item.Id}) + "'")">
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                
+
                 @if (ViewBag.User?.CurrentLadder != item.Id)
                 {
                     <span>
-                        <a asp-action="Join" asp-route-id="@item.Id">Join</a> |
+                        <a asp-action="Join" asp-route-id="@item.Id">Join</a>
                     </span>
                 }
                 @if (ViewBag.IsAdmin)
                 {
                     <span>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        | <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                         <a asp-action="Details" asp-route-id="@item.Id">Details</a>
                     </span>
                 }

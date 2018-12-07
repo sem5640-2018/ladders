@@ -9,13 +9,35 @@
 <div>
     <h5>@(Model?.MemberList?.Count ?? 0) members</h5>
     <hr/>
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div>
+        @if (ViewBag.IsAdmin)
+        {
+            <span><a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |</span>
+        }
+        <a asp-action="Index">Back to List</a>
+    </div>
+
+    <hr/>
+    
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Current Members</th>
+        </tr>
+        </thead>
+        <tbody>
+        @if (Model.MemberList != null)
+        {
+            foreach (var item in Model.MemberList)
+             {
+                 <tr>
+                     <td>
+                         @Html.DisplayFor(modelItem => item.Name)
+                     </td>
+                 </tr>
+             }
+        }
+        </tbody>
+    </table>
+
 </div>

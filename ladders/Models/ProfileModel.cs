@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +27,13 @@ namespace ladders.Models
 
         public virtual string Name { get; set; }
 
-        public virtual int CurrentLadder { get; set; }
+
+        public virtual LadderModel CurrentLadder { get; set; }
+        public virtual int? CurrentLadderId { get; set; }
+
+        public virtual LadderModel ApprovalLadder { get; set; }
+        public virtual int? ApprovalLadderId { get; set; }
+
+
     }
 }

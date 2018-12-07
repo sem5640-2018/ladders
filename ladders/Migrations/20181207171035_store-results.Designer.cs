@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ladders.Models;
 
 namespace ladders.Migrations
 {
     [DbContext(typeof(LaddersContext))]
-    partial class LaddersContextModelSnapshot : ModelSnapshot
+    [Migration("20181207171035_store-results")]
+    partial class storeresults
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,12 +41,14 @@ namespace ladders.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ApprovalLadderId");
-
                     b.Property<string>("Availability")
                         .IsRequired();
 
-                    b.Property<int?>("CurrentLadderId");
+                    b.Property<int>("CurrentLadder");
+
+                    b.Property<int?>("LadderModelId");
+
+                    b.Property<int?>("LadderModelId1");
 
                     b.Property<string>("Name");
 
@@ -58,9 +62,9 @@ namespace ladders.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApprovalLadderId");
+                    b.HasIndex("LadderModelId");
 
-                    b.HasIndex("CurrentLadderId");
+                    b.HasIndex("LadderModelId1");
 
                     b.ToTable("ProfileModel");
                 });
@@ -71,15 +75,7 @@ namespace ladders.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("Draws");
-
-                    b.Property<int>("LadderModelId");
-
-                    b.Property<int>("Losses");
-
-                    b.Property<int>("UserId");
-
-                    b.Property<int>("Wins");
+                    b.Property<int?>("LadderModelId");
 
                     b.HasKey("Id");
 
@@ -90,21 +86,20 @@ namespace ladders.Migrations
 
             modelBuilder.Entity("ladders.Models.ProfileModel", b =>
                 {
-                    b.HasOne("ladders.Models.LadderModel", "ApprovalLadder")
+                    b.HasOne("ladders.Models.LadderModel")
                         .WithMany("ApprovalUsersList")
-                        .HasForeignKey("ApprovalLadderId");
+                        .HasForeignKey("LadderModelId");
 
-                    b.HasOne("ladders.Models.LadderModel", "CurrentLadder")
+                    b.HasOne("ladders.Models.LadderModel")
                         .WithMany("MemberList")
-                        .HasForeignKey("CurrentLadderId");
+                        .HasForeignKey("LadderModelId1");
                 });
 
             modelBuilder.Entity("ladders.Models.Ranking", b =>
                 {
-                    b.HasOne("ladders.Models.LadderModel", "LadderModel")
+                    b.HasOne("ladders.Models.LadderModel")
                         .WithMany("CurrentRankings")
-                        .HasForeignKey("LadderModelId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("LadderModelId");
                 });
 #pragma warning restore 612, 618
         }

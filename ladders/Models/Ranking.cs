@@ -12,9 +12,19 @@ namespace ladders.Models
         public virtual int Id { get; set; }
 
         [Required]
-        private ProfileModel UserProfile { get; set; }
+        public virtual int UserId { get; set; }
 
         [Required]
-        private int Score { get; set; }
+        public virtual int Wins { get; set; }
+
+        [Required]
+        public virtual int Losses { get; set; }
+
+        [Required]
+        public virtual int Draws { get; set; }
+
+        public virtual int LadderModelId { get; set; }
+
+        public virtual LadderModel LadderModel { get; set; }
     }
 }
