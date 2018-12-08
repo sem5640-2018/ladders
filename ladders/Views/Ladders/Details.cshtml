@@ -18,34 +18,7 @@
     </div>
 
     <hr/>
-    
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Current Members</th>
-        </tr>
-        </thead>
-        <tbody>
-        @if (Model.MemberList != null)
-        {
-            foreach (var item in Model?.MemberList)
-            {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Name)
-                    </td>
-                    @if (item != ViewBag.Me)
-                    {
-                        <td>
-                            <a asp-action="Details" asp-route-id="@(Model.Id)">Challenge</a>
-                        </td>
-                    }
-                </tr>
-            }
-        }
-        </tbody>
-    </table>
-    
+
     <table class="table">
         <thead>
         <tr>
@@ -56,6 +29,7 @@
             <th>Wins</th>
             <th>Draws</th>
             <th>Losses</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
@@ -75,6 +49,12 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Losses)
+                </td>
+                <td>
+                    @if (item.User != ViewBag.Me)
+                    {
+                        <a href="@Url.Action("Create","Challenges", new { userId = item.User.Id, ladderId = Model.Id})">Challenge</a>
+                    }
                 </td>
             </tr>
             }

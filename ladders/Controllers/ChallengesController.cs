@@ -6,16 +6,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ladders.Models;
+using ladders.Shared;
+using Newtonsoft.Json;
 
 namespace ladders.Controllers
 {
     public class ChallengesController : Controller
     {
         private readonly LaddersContext _context;
+        private readonly IApiClient apiClient;
 
-        public ChallengesController(LaddersContext context)
+        public ChallengesController(LaddersContext context, IApiClient client)
         {
             _context = context;
+            apiClient = client;
         }
 
         // GET: Challenges
@@ -43,9 +47,44 @@ namespace ladders.Controllers
         }
 
         // GET: Challenges/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(int? userId, int? ladderId)
         {
-            return View();
+            if (userId == null || ladderId == null)
+            {
+                return NotFound();
+            }
+
+            var challengee = await _context.ProfileModel.FindAsync(userId);
+            var ladder = await _context.LadderModel.FindAsync(ladderId);
+
+            if (challengee == null || ladder == null)
+            {
+                return NotFound();
+            }
+
+            var challenge = new Challenge
+            {
+                ChallengedTime = DateTime.UtcNow,
+                Resolved = false,
+                Challenger = await Helpers.GetMe(User, _context),
+                Challengee = challengee,
+                Ladder = ladder
+            };
+
+            var venueData = await apiClient.GetAsync("https://docker2.aberfitness.biz/booking-facilities/api/venues");
+            var sportData = await apiClient.GetAsync("https://docker2.aberfitness.biz/booking-facilities/api/sports");
+            if (!venueData.IsSuccessStatusCode || !sportData.IsSuccessStatusCode) return View(challenge);
+
+            var info = await venueData.Content.ReadAsStringAsync();
+            var facilities = JsonConvert.DeserializeObject<ICollection<Venue>>(info);
+
+            info = await sportData.Content.ReadAsStringAsync();
+            var sports = JsonConvert.DeserializeObject<ICollection<Sport>>(info);
+
+            ViewBag.VenueId = new SelectList(facilities, "VenueId", "VenueName");
+            ViewBag.ClientId = new SelectList(sports, "SportId", "SportName");
+
+            return View(challenge);
         }
 
         // POST: Challenges/Create
@@ -53,7 +92,7 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,BookingId,ChallengedTime,Resolved,Result")] Challenge challenge)
+        public async Task<IActionResult> Create([Bind("Id,BookingId,ChallengedTime,Challenger,Challengee,Resolved,Result")] Challenge challenge)
         {
             if (ModelState.IsValid)
             {

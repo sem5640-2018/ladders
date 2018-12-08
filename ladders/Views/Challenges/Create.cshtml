@@ -12,6 +12,17 @@
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input asp-for="Challenger" type="hidden" />
+            <input asp-for="Challengee" type="hidden" />
+            <input asp-for="ChallengedTime" type="hidden" />
+            <input asp-for="Ladder" type="hidden" />
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.Facility.venueId, new { @class = "control-label" })
+                @Html.DropDownList("VenueId", (IEnumerable<SelectListItem>)ViewBag.VenueId, new { @id = "venueDDL", @class = "form-control", @onchange = "updateSports(); getTimes()" })
+            </div>
+
             <div class="form-group">
                 <label asp-for="BookingId" class="control-label"></label>
                 <input asp-for="BookingId" class="form-control" />
@@ -23,18 +34,6 @@
                 <span asp-validation-for="ChallengedTime" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="Resolved" /> @Html.DisplayNameFor(model => model.Resolved)
-                    </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label asp-for="Result" class="control-label"></label>
-                <select asp-for="Result" class="form-control"></select>
-                <span asp-validation-for="Result" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-default" />
             </div>
         </form>
@@ -44,4 +43,50 @@
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
+
+
+@section Scripts {
+
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        function updateDateTime() {
+            document.getElementById("BookingDateTime").value = document.getElementById("BookingDateId").value + "T" + $("#timeDDL :selected").text();
+        }
+        function updateSports() {
+            document.getElementById("BookingDateId").value = document.getElementById("BookingDateTime").value = "";
+            $("#timeDDL").empty();
+            urlVenues = '@Url.Content("~/")' + "api/booking/getSportsByVenue" + '/' + $("#venueDDL").val();
+
+
+            $.ajax({
+                url: urlVenues,
+                success: function (json) {
+                    var items = "";
+                    $.each(json, function (i, sport) {
+                        items += "<option value='" + sport.sportId + "'>" + sport.sportName + "</option>";
+                    })
+                    $("#sportDDL").empty().html(items);
+                }
+            });
+        }
+        function getTimes() {
+            var urlBooking = '@Url.Content("~/")' + "api/booking/"  + document.getElementById("BookingDateId").value + "/" + $("#venueDDL").val() + "/" + $("#sportDDL").val();
+            $.ajax({
+                url: urlBooking,
+                success: function (json) {
+                    var times = "";
+                    $("#BookingTimeForm").show();
+                    $.each(json, function (i, time) {
+                        var dout = new Date(Date.parse(time));
+                        times += "<option value='" + i + "'>" + ("0" + dout.getHours()).slice(-2) + ":00:00" + "</option>";
+                    })
+                    $("#timeDDL").empty().html(times);
+                    updateDateTime();
+                }
+            });
+        }
+        updateSports();
+    </script>
+}
 

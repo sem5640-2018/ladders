@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using ladders.Models;
+using ladders.Shared;
 using Microsoft.AspNetCore.Authentication;
 
 namespace ladders
@@ -28,6 +29,10 @@ namespace ladders
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient("LadderClient", client => {
+            });
+            services.AddSingleton<IApiClient, ApiClient>();
+
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
