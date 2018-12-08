@@ -81,8 +81,8 @@ namespace ladders.Controllers
             info = await sportData.Content.ReadAsStringAsync();
             var sports = JsonConvert.DeserializeObject<ICollection<Sport>>(info);
 
-            ViewBag.VenueId = new SelectList(facilities, "VenueId", "VenueName");
-            ViewBag.ClientId = new SelectList(sports, "SportId", "SportName");
+            ViewBag.VenueId = new SelectList(facilities, "venueId", "venueName");
+            ViewBag.SportId = new SelectList(sports, "sportId", "sportName");
 
             return View(challenge);
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IdentityModel;
 using ladders.Models;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
@@ -21,19 +22,29 @@ namespace ladders.Controllers
         {
             apiClient = client;
         }
-
-        [HttpGet]
-        public async Task<IActionResult> Get()
+        [HttpGet("{date}/{venueId}/{sportId}")]
+        public async Task<IActionResult> GetTimes([FromRoute] DateTime date, [FromRoute] int venueId, [FromRoute] int sportId)
         {
-            var someData = await apiClient.GetAsync("https://aberfitness.biz/some_service/whatever_api_youre_calling");
-            // do something with someData
-            return Ok();
+            var dateToUse = date.ToString("yyyy-MM-dd");
+            var timeData = await apiClient.GetAsync($"https://docker2.aberfitness.biz/booking-facilities/api/booking/{dateToUse}/{venueId}/{sportId}");
+
+            if (!timeData.IsSuccessStatusCode)
+            {
+                return (NoContent());
+            }
+
+            var info = await timeData.Content.ReadAsStringAsync();
+            var sports = JsonConvert.DeserializeObject<ICollection<DateTime>>(info);
+
+            return (Ok(sports));
         }
 
         [HttpGet("getSportsByVenue/{id}")]
         public async Task<IActionResult> GetSport([FromRoute] int id)
         {
-            var sportsData = await apiClient.GetAsync("https://docker2.aberfitness.biz/booking-facilities/api/sports/getSportsByVenue/"+ id);
+            var sportsData =
+                await apiClient.GetAsync(
+                    "https://docker2.aberfitness.biz/booking-facilities/api/sports/getSportsByVenue/" + id);
             if (!sportsData.IsSuccessStatusCode)
             {
                 return (NoContent());
@@ -44,4 +55,5 @@ namespace ladders.Controllers
 
             return (Ok(sports));
         }
+    }
 }
