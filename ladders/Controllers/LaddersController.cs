@@ -34,10 +34,13 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
-            var ladderModel = await _context.LadderModel.Include(ladder => ladder.MemberList)
+            var ladderModel = await _context.LadderModel
+                .Include(ladder => ladder.MemberList)
+                .Include(ladder => ladder.CurrentRankings)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ladderModel == null) return NotFound();
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
+            ViewBag.Me = await Helpers.GetMe(User, _context);
 
             return View(ladderModel);
         }
@@ -63,20 +66,18 @@ namespace ladders.Controllers
 
             var ladderModel = await _context.LadderModel
                 .Include(ladder => ladder.ApprovalUsersList)
+                .Include(ladder => ladder.CurrentRankings)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ladderModel == null) return NotFound();
 
             var me = await Helpers.GetMe(User, _context);
-            if (me == null) return RedirectToPage("Profile", "Create");
+            if (me == null) return RedirectToAction("Create", "Profile");
 
             if (IsMember(me, ladderModel))
                 return RedirectToAction(nameof(Details), new {id});
 
             if (ladderModel.ApprovalUsersList == null)
                 ladderModel.ApprovalUsersList = new List<ProfileModel>();
-
-            ladderModel.ApprovalUsersList.Add(me);
-            me.ApprovalLadder = ladderModel;
 
             _context.Update(me);
             _context.Update(ladderModel);
@@ -127,6 +128,20 @@ namespace ladders.Controllers
             {
                 ladderModel.MemberList.Add(user);
                 user.CurrentLadder = ladderModel;
+                var newRanking = new Ranking
+                {
+                    User = user,
+                    Challenges = new List<Challenge>(),
+                    LadderModel = ladderModel,
+                    Wins = 0,
+                    Draws = 0,
+                    Losses = 0
+                };
+
+                ladderModel.CurrentRankings.Add(newRanking);
+                ladderModel.ApprovalUsersList.Add(user);
+                user.ApprovalLadder = ladderModel;
+
             }
 
             _context.Update(user);

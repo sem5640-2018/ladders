@@ -28,14 +28,56 @@
         <tbody>
         @if (Model.MemberList != null)
         {
-            foreach (var item in Model.MemberList)
-             {
-                 <tr>
-                     <td>
-                         @Html.DisplayFor(modelItem => item.Name)
-                     </td>
-                 </tr>
-             }
+            foreach (var item in Model?.MemberList)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    @if (item != ViewBag.Me)
+                    {
+                        <td>
+                            <a asp-action="Details" asp-route-id="@(Model.Id)">Challenge</a>
+                        </td>
+                    }
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+    
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Ladder</th>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <th>Wins</th>
+            <th>Draws</th>
+            <th>Losses</th>
+        </tr>
+        </thead>
+        <tbody>
+        @if (Model.MemberList != null)
+        {
+            foreach (var item in Model?.CurrentRankings.OrderByDescending(a => a.Losses).ThenBy(a => a.Draws).ThenBy(a => a.Wins))
+            {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.User.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Wins)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Draws)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Losses)
+                </td>
+            </tr>
+            }
         }
         </tbody>
     </table>

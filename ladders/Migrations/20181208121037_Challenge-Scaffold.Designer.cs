@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ladders.Models;
 
 namespace ladders.Migrations
 {
     [DbContext(typeof(LaddersContext))]
-    partial class LaddersContextModelSnapshot : ModelSnapshot
+    [Migration("20181208121037_Challenge-Scaffold")]
+    partial class ChallengeScaffold
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,8 +37,6 @@ namespace ladders.Migrations
 
                     b.Property<int?>("LadderId");
 
-                    b.Property<int?>("RankingId");
-
                     b.Property<bool>("Resolved");
 
                     b.Property<int>("Result");
@@ -50,8 +50,6 @@ namespace ladders.Migrations
                     b.HasIndex("ChallengerId");
 
                     b.HasIndex("LadderId");
-
-                    b.HasIndex("RankingId");
 
                     b.HasIndex("facilityId");
 
@@ -135,8 +133,7 @@ namespace ladders.Migrations
 
                     b.Property<int>("Draws");
 
-                    b.Property<int?>("LadderModelId")
-                        .IsRequired();
+                    b.Property<int>("LadderModelId");
 
                     b.Property<int>("Losses");
 
@@ -192,10 +189,6 @@ namespace ladders.Migrations
                     b.HasOne("ladders.Models.LadderModel", "Ladder")
                         .WithMany()
                         .HasForeignKey("LadderId");
-
-                    b.HasOne("ladders.Models.Ranking")
-                        .WithMany("Challenges")
-                        .HasForeignKey("RankingId");
 
                     b.HasOne("ladders.Models.Facility", "Facility")
                         .WithMany()

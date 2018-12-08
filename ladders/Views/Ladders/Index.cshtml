@@ -6,9 +6,12 @@
 
 <h2>Index</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+@if (ViewBag.IsAdmin)
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+}
 <table class="table">
     <thead>
     <tr>
@@ -24,7 +27,7 @@
             </td>
             <td>
 
-                @if (ViewBag.User?.CurrentLadder != item.Id)
+                @if (ViewBag.User?.CurrentLadder != item)
                 {
                     <span>
                         <a asp-action="Join" asp-route-id="@item.Id">Join</a>

@@ -20,6 +20,7 @@ namespace ladders.Models
         [Required]
         public virtual ICollection<ProfileModel> MemberList { get; set; }
 
+        [InverseProperty("LadderModel")]
         [Required]
         public virtual ICollection<Ranking> CurrentRankings { get; set; }
 

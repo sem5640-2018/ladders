@@ -17,5 +17,7 @@ namespace ladders.Models
         public DbSet<ladders.Models.ProfileModel> ProfileModel { get; set; }
 
         public DbSet<ladders.Models.LadderModel> LadderModel { get; set; }
+
+        public DbSet<ladders.Models.Challenge> Challenge { get; set; }
     }
 }

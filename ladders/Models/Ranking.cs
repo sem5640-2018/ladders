@@ -12,7 +12,7 @@ namespace ladders.Models
         public virtual int Id { get; set; }
 
         [Required]
-        public virtual int UserId { get; set; }
+        public virtual ProfileModel User { get; set; }
 
         [Required]
         public virtual int Wins { get; set; }
@@ -23,8 +23,11 @@ namespace ladders.Models
         [Required]
         public virtual int Draws { get; set; }
 
-        public virtual int LadderModelId { get; set; }
+        public virtual int? LadderModelId { get; set; }
 
+        [Required]
         public virtual LadderModel LadderModel { get; set; }
+
+        public virtual ICollection<Challenge> Challenges { get; set; }
     }
 }
