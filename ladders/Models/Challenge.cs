@@ -11,13 +11,14 @@ namespace ladders.Models
     public enum Winner
     {
         Challenger = 1,
-        Draw = 1,
+        Draw = 0,
         Challengee = -1
     }
 
     public class Challenge
     {
         [Key]
+        [Required]
         public virtual int Id { get; set; }
 
         public int? ChallengerId { get; set; }
