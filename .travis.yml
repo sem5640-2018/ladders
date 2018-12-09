@@ -35,3 +35,6 @@ jobs:
         - docker
       script:
         - ./bin/docker.sh latest
+
+notifications:
+    slack: sem5640-2018:iSwMM5tPZh52WE5kVelricok
