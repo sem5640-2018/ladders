@@ -1,10 +1,30 @@
-language: csharp
-solution: ladders.sln
-mono: none
-dotnet: 2.1
+env:
+    global:
+    - secure: J2Sikca+3RsqOUYdKwLIv7YnE0qYTKovbJnEOju9C8bAtMNkOvZR/yWXFo+SgKYWLiQFsMJUSY8CAztY2rEX2iDfARJaMafYkpI1ZjVpT1NGK6L6ezcImrSoVeKkHHdXfLrP99xUgBbMwX9vwG8hZXf8ZX6j4gfCNQQtEh/JuhfzNxM53GPhKzNso1NHPiCOAUbE7SRSDpncX0i+npplCOclS2mqfcemwIrykHxEDrD3KUUTZmdIPCDLsljSacJDHCVUcgwDO8TN5z+aoX36Q0DnNj71RAH1fi7D/CTnawH/QbJjSSlfGxGq2JvaBwGmivPnMxu9cqDthwG/M1oPhA4DtO72dwL+slsR8BVfSPgyo6YSua4gRc+SvCwf61JC4VBqDoD7qxCgXFY/i1FZkGzldpeXT9dDwiMdT6MwAzI3Ah9PsRqzAIRugqhcLDOAxdH1HjIlI3f2KvF/RZJOrGJozOLLoTAvXZTqdkrr5ou1qhEU04VvMOeCkYA1Z4WUVQ0ragWVCQaN25g3fM+zDy7fQh4dOlwCnd7o2hjZkz0MKF84qHahObfBq3HgHk+0Xo27pTlym2tItMK4+x7yQaEFC0EeH670s2o06ABp4H1ApY1tO6/VCXhYoSH8ydXqVZn3qasLDPCIzytXTjE2aeev/A45uCta7zZI0CkVNbE=
+    - secure: TOzb60XnQSdPwpG2IIhYHZf2019xuCKyzdfre4W101QVbxwdPR78FDHvJ6aeYLCa4vnhjLxEQSCOhjamXdS7V98WFtOACz8Mmx+EqL+WbzY7SeE8G0GCJCTI1SYS6s0WuBXRkDQVAHd0fWxFKzD5DAM+se3rY+LFuIyCdMgzj9u6UaASdneaTcQRel0IfvCM8//NTwiK9nt3hp/m8YvVK6Ar9xghuwpwmWEz/gP6eG5UT72rx7+FD6RChlPwWVEcKJFJTFRx/c+oBVUYvSonrhVAFZ/yp0tY4bH7hQZ09qMx6wvfcVJ9ysM1X7A19FCYLNpQZ4pZw4eWyyURcB/MKEPHrQ+tB2quRNd/TgQI9kZP2zK0AnQQBG/bMn9WDElXbyMOL8GGFImuvgwy7DxFGPZE8l1WnCHdiReD8LjTKxIrdT9/a9nsSuY9ckIEGPvA0Fj8xn92XWQpRIKAfYkFa7WFX1Nw4lE+kfd/8GhcJXLws6nvVtaRN6QInNGuzei7sKV/SYYN/HqxSg1A2UO5uXphMjyhZYpfxASAa8DrDLCT7OM5gTr9eOp3JLNPb7KGgMFIg6Ekzlr7KUKAJWXEQfVE7wIiVijK6PHeTGVeJ5g7ILFV/6buO3kG5lpAokZtUl9r1k9XtLAxXnUDIyyXSGeip0lJVFaZVezG/Uem3aI=
 
-script:
-- dotnet restore
-
-notifications:
-    slack: sem5640-2018:iSwMM5tPZh52WE5kVelricok
+jobs:
+  include:
+    - stage: test
+      name: "xUnit Tests"
+      language: csharp
+      solution: ladders.sln
+      mono: none
+      dotnet: 2.1
+      script:
+        - dotnet restore
+        # - dotnet test ladderTest/ladderTest.csproj
+    - stage: build_staging
+      name: "Build docker staging image"
+      sudo: required
+      services:
+        - docker
+      script:
+        - ./bin/docker.sh staging
+    - stage: build_release
+      name: "Build docker release image"
+      sudo: required
+      services:
+        - docker
+      script:
+        - ./bin/docker.sh latest
