@@ -81,7 +81,7 @@ namespace ladders
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddDbContext<LaddersContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("LaddersContext")));
+                    options.UseMySql(Configuration.GetConnectionString("LaddersContext")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
