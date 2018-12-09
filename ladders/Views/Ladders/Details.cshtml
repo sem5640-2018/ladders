@@ -7,7 +7,7 @@
 <h2>@(Model.Name) Ladder</h2>
 
 <div>
-    <h5>@(Model?.MemberList?.Count ?? 0) members</h5>
+    <h5>@(Model?.CurrentRankings?.Count ?? 0) members</h5>
     <hr/>
     <div>
         @if (ViewBag.IsAdmin)
@@ -33,7 +33,7 @@
         </tr>
         </thead>
         <tbody>
-        @if (Model.MemberList != null)
+        @if (Model.CurrentRankings != null)
         {
             foreach (var item in Model?.CurrentRankings.OrderByDescending(a => a.Losses).ThenBy(a => a.Draws).ThenBy(a => a.Wins))
             {
@@ -51,7 +51,7 @@
                     @Html.DisplayFor(modelItem => item.Losses)
                 </td>
                 <td>
-                    @if (item.User != ViewBag.Me)
+                    @if (item.User != ViewBag.Me && ViewBag.Me?.CurrentLadderId == Model.Id)
                     {
                         <a href="@Url.Action("Create","Challenges", new { userId = item.User.Id, ladderId = Model.Id})">Challenge</a>
                     }

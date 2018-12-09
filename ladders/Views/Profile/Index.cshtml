@@ -28,7 +28,7 @@
                 Available
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CurrentLadder)
+                @Html.DisplayNameFor(model => model.CurrentRanking.LadderModel)
             </th>
             <th></th>
         </tr>
@@ -50,7 +50,7 @@
                     @Html.DisplayFor(modelItem => item.Suspended)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.CurrentLadder)
+                    @Html.DisplayFor(modelItem => item.CurrentRanking.LadderModel)
                 </td>
                 <td>
                     @if (ViewBag.IsAdmin || ViewBag.ID?.Equals(item.UserId))

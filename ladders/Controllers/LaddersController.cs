@@ -35,7 +35,6 @@ namespace ladders.Controllers
             if (id == null) return NotFound();
 
             var ladderModel = await _context.LadderModel
-                .Include(ladder => ladder.MemberList)
                 .Include(ladder => ladder.CurrentRankings)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ladderModel == null) return NotFound();
@@ -115,9 +114,8 @@ namespace ladders.Controllers
             var ladderModel = await _context.LadderModel
                 .Include(m => m.ApprovalUsersList)
                 .Include(m => m.CurrentRankings)
-                .Include(l => l.MemberList)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            var user = await _context.ProfileModel.Include(u => u.ApprovalLadder).Include(p => p.CurrentLadder).FirstOrDefaultAsync(u => u.UserId == userId);
+            var user = await _context.ProfileModel.Include(u => u.ApprovalLadder).Include(p => p.CurrentRanking).FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (ladderModel == null || user == null) return NotFound();
 
@@ -129,8 +127,6 @@ namespace ladders.Controllers
 
             if (add)
             {
-                ladderModel.MemberList.Add(user);
-                user.CurrentLadder = ladderModel;
                 var newRanking = new Ranking
                 {
                     User = user,
@@ -141,6 +137,7 @@ namespace ladders.Controllers
                     Losses = 0
                 };
 
+                user.CurrentRanking = newRanking;
                 ladderModel.CurrentRankings.Add(newRanking);
             }
 
@@ -159,7 +156,6 @@ namespace ladders.Controllers
 
             var ladderModel = new LadderModel
             {
-                MemberList = new List<ProfileModel>(),
                 CurrentRankings = new List<Ranking>(),
                 ApprovalUsersList = new List<ProfileModel>()
             };
@@ -194,7 +190,6 @@ namespace ladders.Controllers
 
             var ladderModel = await _context.LadderModel
                 .Include(m => m.ApprovalUsersList)
-                .Include(l => l.MemberList)
                 .Include(o => o.CurrentRankings)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -280,16 +275,17 @@ namespace ladders.Controllers
             if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
             var user = await _context.ProfileModel.FindAsync(id);
-            if (user.CurrentLadder == null)
+            if (user.CurrentRanking == null)
                 return RedirectToAction(nameof(Index));
 
-            var ladderModel = user.CurrentLadder;
+            var ladderModel = user.CurrentRanking.LadderModel;
 
             if (ladderModel == null)
                 return NotFound();
 
-            ladderModel.MemberList.Remove(user);
-            user.CurrentLadder = null;
+            var rank = ladderModel.CurrentRankings.FirstOrDefault(a => a.User == user);
+            ladderModel.CurrentRankings.Remove(rank);
+            user.CurrentRanking = null;
 
             _context.ProfileModel.Update(user);
             _context.LadderModel.Update(ladderModel);
@@ -315,7 +311,7 @@ namespace ladders.Controllers
 
         private static bool IsMember(ProfileModel user, LadderModel ladder)
         {
-            return ladder.MemberList?.Contains(user) ?? false;
+            return ladder.CurrentRankings?.FirstOrDefault(a => a.User == user) == null;
         }
 
         #endregion

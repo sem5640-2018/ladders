@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using ladders.Models;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace ladders
 {
@@ -92,7 +93,16 @@ namespace ladders
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UsePathBase("/ladders");
+                app.Use((context, next) =>
+                {
+                    context.Request.PathBase = new PathString("/ladders");
+                    return next();
+                });
+                app.UseForwardedHeaders(new ForwardedHeadersOptions
+                {
+                    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+                });
                 app.UseHsts();
             }
 

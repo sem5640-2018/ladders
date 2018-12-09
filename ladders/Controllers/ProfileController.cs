@@ -51,7 +51,7 @@ namespace ladders.Controllers
 
             profileModel.UserId = Helpers.GetMyName(User);
             profileModel.Name = User.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
-            profileModel.CurrentLadder = null;
+            profileModel.CurrentRanking = null;
             profileModel.ApprovalLadder = null;
             profileModel.Suspended = false;
             return View(profileModel);

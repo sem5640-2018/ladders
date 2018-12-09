@@ -15,12 +15,8 @@ namespace ladders.Models
         [Required]
         public virtual string Name { get; set; }
 
-        [InverseProperty("CurrentLadder")]
-        [MaxLength(200)]
-        [Required]
-        public virtual ICollection<ProfileModel> MemberList { get; set; }
-
         [InverseProperty("LadderModel")]
+        [MaxLength(200)]
         [Required]
         public virtual ICollection<Ranking> CurrentRankings { get; set; }
 

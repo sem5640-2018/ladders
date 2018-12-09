@@ -21,8 +21,8 @@ namespace ladders.Models
 
         public virtual string Name { get; set; }
         
-        public virtual LadderModel CurrentLadder { get; set; }
-        public virtual int? CurrentLadderId { get; set; }
+        public virtual Ranking CurrentRanking { get; set; }
+        public virtual int? CurrentRankingId { get; set; }
 
         public virtual LadderModel ApprovalLadder { get; set; }
         public virtual int? ApprovalLadderId { get; set; }

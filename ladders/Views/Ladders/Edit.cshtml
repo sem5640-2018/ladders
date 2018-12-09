@@ -12,7 +12,6 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input asp-for="ApprovalUsersList" type="hidden" />
             <input asp-for="CurrentRankings" type="hidden" />
-            <input asp-for="MemberList" type="hidden" />
             
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
@@ -35,14 +34,14 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.MemberList)
+        @foreach (var item in Model.CurrentRankings)
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Name)
+                    @Html.DisplayFor(modelItem => item.User.Name)
                 </td>
                 <td>
-                    <a asp-action="RemoveUser" asp-route-id="@item.Id">Remove</a>
+                    <a asp-action="RemoveUser" asp-route-id="@item.User.Id">Remove</a>
                 </td>
             </tr>
         }
