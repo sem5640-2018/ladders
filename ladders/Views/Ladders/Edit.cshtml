@@ -4,9 +4,7 @@
     ViewData["Title"] = "Edit";
 }
 
-<h2>Edit</h2>
-
-<h4>LadderModel</h4>
+<h2>Edit Model</h2>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -14,7 +12,6 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input asp-for="ApprovalUsersList" type="hidden" />
             <input asp-for="CurrentRankings" type="hidden" />
-            <input asp-for="MemberList" type="hidden" />
             
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
@@ -29,6 +26,27 @@
         </form>
     </div>
 </div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Current Members</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.CurrentRankings)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.User.Name)
+                </td>
+                <td>
+                    <a asp-action="RemoveUser" asp-route-id="@item.User.Id">Remove</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 <div>
     <a asp-action="Index">Back to List</a>

@@ -25,6 +25,7 @@ namespace ladders.Controllers
         {
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
             ViewBag.ID = Helpers.GetMyName(User);
+            ViewBag.HaveAccount = Helpers.DoIHaveAnAccount(User, _context);
 
             return View(await _context.ProfileModel.ToListAsync());
         }
@@ -50,7 +51,8 @@ namespace ladders.Controllers
 
             profileModel.UserId = Helpers.GetMyName(User);
             profileModel.Name = User.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
-            profileModel.CurrentLadder = -1;
+            profileModel.CurrentRanking = null;
+            profileModel.ApprovalLadder = null;
             profileModel.Suspended = false;
             return View(profileModel);
         }

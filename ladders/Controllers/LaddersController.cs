@@ -25,6 +25,7 @@ namespace ladders.Controllers
         public async Task<IActionResult> Index()
         {
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
+            ViewBag.User = await Helpers.GetMe(User, _context);
             return View(await _context.LadderModel.ToListAsync());
         }
 
@@ -33,9 +34,12 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
-            var ladderModel = await _context.LadderModel.Include(ladder => ladder.MemberList)
+            var ladderModel = await _context.LadderModel
+                .Include(ladder => ladder.CurrentRankings)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ladderModel == null) return NotFound();
+            ViewBag.IsAdmin = Helpers.AmIAdmin(User);
+            ViewBag.Me = await Helpers.GetMe(User, _context);
 
             return View(ladderModel);
         }
@@ -61,20 +65,22 @@ namespace ladders.Controllers
 
             var ladderModel = await _context.LadderModel
                 .Include(ladder => ladder.ApprovalUsersList)
+                .Include(ladder => ladder.CurrentRankings)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ladderModel == null) return NotFound();
 
             var me = await Helpers.GetMe(User, _context);
-            if (me == null) return RedirectToPage("Profile", "Create");
+            if (me == null) return RedirectToAction("Create", "Profile");
 
             if (IsMember(me, ladderModel))
                 return RedirectToAction(nameof(Details), new {id});
 
             if (ladderModel.ApprovalUsersList == null)
                 ladderModel.ApprovalUsersList = new List<ProfileModel>();
-
             ladderModel.ApprovalUsersList.Add(me);
+            me.ApprovalLadder = ladderModel;
 
+            _context.Update(me);
             _context.Update(ladderModel);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Details), new {id});
@@ -107,9 +113,9 @@ namespace ladders.Controllers
 
             var ladderModel = await _context.LadderModel
                 .Include(m => m.ApprovalUsersList)
-                .Include(l => l.MemberList)
+                .Include(m => m.CurrentRankings)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            var user = await _context.ProfileModel.FirstOrDefaultAsync(u => u.UserId == userId);
+            var user = await _context.ProfileModel.Include(u => u.ApprovalLadder).Include(p => p.CurrentRanking).FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (ladderModel == null || user == null) return NotFound();
 
@@ -117,11 +123,22 @@ namespace ladders.Controllers
                 return View(ladderModel);
 
             ladderModel.ApprovalUsersList.Remove(user);
+            user.ApprovalLadder = null;
 
             if (add)
             {
-                ladderModel.MemberList.Add(user);
-                user.CurrentLadder = ladderModel.Id;
+                var newRanking = new Ranking
+                {
+                    User = user,
+                    Challenges = new List<Challenge>(),
+                    LadderModel = ladderModel,
+                    Wins = 0,
+                    Draws = 0,
+                    Losses = 0
+                };
+
+                user.CurrentRanking = newRanking;
+                ladderModel.CurrentRankings.Add(newRanking);
             }
 
             _context.Update(user);
@@ -139,7 +156,6 @@ namespace ladders.Controllers
 
             var ladderModel = new LadderModel
             {
-                MemberList = new List<ProfileModel>(),
                 CurrentRankings = new List<Ranking>(),
                 ApprovalUsersList = new List<ProfileModel>()
             };
@@ -172,7 +188,11 @@ namespace ladders.Controllers
 
             if (id == null) return NotFound();
 
-            var ladderModel = await _context.LadderModel.FindAsync(id);
+            var ladderModel = await _context.LadderModel
+                .Include(m => m.ApprovalUsersList)
+                .Include(o => o.CurrentRankings)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (ladderModel == null) return NotFound();
             return View(ladderModel);
         }
@@ -235,6 +255,45 @@ namespace ladders.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        public async Task<IActionResult> RemoveUser(int? id)
+        {
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
+
+            if (id == null) return NotFound();
+
+            var user = await _context.ProfileModel.FindAsync(id);
+            if (user == null) return NotFound();
+            return View(user);
+        }
+
+        // POST: Ladders/Delete/5
+        [HttpPost]
+        [ActionName("RemoveUser")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveUserConfirmed(int id)
+        {
+            if (!Helpers.AmIAdmin(User)) return Unauthorized();
+
+            var user = await _context.ProfileModel.FindAsync(id);
+            if (user.CurrentRanking == null)
+                return RedirectToAction(nameof(Index));
+
+            var ladderModel = user.CurrentRanking.LadderModel;
+
+            if (ladderModel == null)
+                return NotFound();
+
+            var rank = ladderModel.CurrentRankings.FirstOrDefault(a => a.User == user);
+            ladderModel.CurrentRankings.Remove(rank);
+            user.CurrentRanking = null;
+
+            _context.ProfileModel.Update(user);
+            _context.LadderModel.Update(ladderModel);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
         private bool LadderModelExists(int id)
         {
             return _context.LadderModel.Any(e => e.Id == id);
@@ -252,7 +311,7 @@ namespace ladders.Controllers
 
         private static bool IsMember(ProfileModel user, LadderModel ladder)
         {
-            return ladder.MemberList?.Contains(user) ?? false;
+            return ladder.CurrentRankings?.FirstOrDefault(a => a.User == user) == null;
         }
 
         #endregion

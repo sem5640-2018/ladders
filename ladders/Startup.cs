@@ -12,7 +12,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using ladders.Models;
+using ladders.Shared;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace ladders
 {
@@ -28,6 +30,10 @@ namespace ladders
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient("LadderClient", client => {
+            });
+            services.AddSingleton<IApiClient, ApiClient>();
+
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -64,7 +70,12 @@ namespace ladders
                 options.AddPolicy("Administrator", pb => pb.RequireClaim("user_type", "administrator"));
 
                 // Coordinator policy allows both Coordinators and Administrators
-                options.AddPolicy("Coordinator", pb => pb.RequireClaim("user_type", new[] { "administrator", "coordinator" }));
+                options.AddPolicy("Coordinator", pb => pb.RequireClaim("user_type", "administrator", "coordinator"));
+            });
+
+            services.AddMvc().AddRazorPagesOptions(options =>
+            {
+                options.Conventions.AddPageRoute("/Ladders/Index", "");
             });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
@@ -82,7 +93,16 @@ namespace ladders
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UsePathBase("/ladders");
+                app.Use((context, next) =>
+                {
+                    context.Request.PathBase = new PathString("/ladders");
+                    return next();
+                });
+                app.UseForwardedHeaders(new ForwardedHeadersOptions
+                {
+                    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+                });
                 app.UseHsts();
             }
 

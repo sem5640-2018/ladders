@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ladders.Models;
 
 namespace ladders.Migrations
 {
     [DbContext(typeof(LaddersContext))]
-    partial class LaddersContextModelSnapshot : ModelSnapshot
+    [Migration("20181209164444_Require-Users")]
+    partial class RequireUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -125,7 +127,7 @@ namespace ladders.Migrations
                     b.Property<string>("Availability")
                         .IsRequired();
 
-                    b.Property<int?>("CurrentRankingId");
+                    b.Property<int?>("CurrentLadderId");
 
                     b.Property<string>("Name");
 
@@ -141,9 +143,7 @@ namespace ladders.Migrations
 
                     b.HasIndex("ApprovalLadderId");
 
-                    b.HasIndex("CurrentRankingId")
-                        .IsUnique()
-                        .HasFilter("[CurrentRankingId] IS NOT NULL");
+                    b.HasIndex("CurrentLadderId");
 
                     b.ToTable("ProfileModel");
                 });
@@ -161,11 +161,15 @@ namespace ladders.Migrations
 
                     b.Property<int>("Losses");
 
+                    b.Property<int>("UserId");
+
                     b.Property<int>("Wins");
 
                     b.HasKey("Id");
 
                     b.HasIndex("LadderModelId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Ranking");
                 });
@@ -246,9 +250,9 @@ namespace ladders.Migrations
                         .WithMany("ApprovalUsersList")
                         .HasForeignKey("ApprovalLadderId");
 
-                    b.HasOne("ladders.Models.Ranking", "CurrentRanking")
-                        .WithOne("User")
-                        .HasForeignKey("ladders.Models.ProfileModel", "CurrentRankingId");
+                    b.HasOne("ladders.Models.LadderModel", "CurrentLadder")
+                        .WithMany("MemberList")
+                        .HasForeignKey("CurrentLadderId");
                 });
 
             modelBuilder.Entity("ladders.Models.Ranking", b =>
@@ -256,6 +260,11 @@ namespace ladders.Migrations
                     b.HasOne("ladders.Models.LadderModel", "LadderModel")
                         .WithMany("CurrentRankings")
                         .HasForeignKey("LadderModelId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("ladders.Models.ProfileModel", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618

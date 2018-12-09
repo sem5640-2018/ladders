@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ladders.Models
 {
@@ -25,7 +20,12 @@ namespace ladders.Models
         public virtual bool Suspended { get; set; }
 
         public virtual string Name { get; set; }
+        
+        public virtual Ranking CurrentRanking { get; set; }
+        public virtual int? CurrentRankingId { get; set; }
 
-        public virtual int CurrentLadder { get; set; }
+        public virtual LadderModel ApprovalLadder { get; set; }
+        public virtual int? ApprovalLadderId { get; set; }
+
     }
 }

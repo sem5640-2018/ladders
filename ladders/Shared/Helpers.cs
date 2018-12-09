@@ -12,9 +12,7 @@ namespace ladders.Shared
     {
         public static bool AmIAdmin(ClaimsPrincipal user)
         {
-            var usersGroup = user.Claims.Where(c => c.Type == "user_type");
-            return usersGroup.Select(claim => claim.Value)
-                .Any(value => value.Equals("administrator") || value.Equals("coordinator"));
+            return user.HasClaim("user_type", "administrator") || user.HasClaim("user_type", "coordinator");
         }
 
         public static bool DoIHaveAnAccount(ClaimsPrincipal user, LaddersContext context)
