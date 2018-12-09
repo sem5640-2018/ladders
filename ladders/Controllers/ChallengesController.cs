@@ -14,12 +14,12 @@ namespace ladders.Controllers
     public class ChallengesController : Controller
     {
         private readonly LaddersContext _context;
-        private readonly IApiClient apiClient;
+        private readonly IApiClient _apiClient;
 
         public ChallengesController(LaddersContext context, IApiClient client)
         {
             _context = context;
-            apiClient = client;
+            _apiClient = client;
         }
 
         // GET: Challenges
@@ -65,14 +65,15 @@ namespace ladders.Controllers
             var challenge = new Challenge
             {
                 ChallengedTime = DateTime.UtcNow,
-                Resolved = false,
+                Created = DateTime.UtcNow,
+                Resolved = true,
                 Challenger = await Helpers.GetMe(User, _context),
                 Challengee = challengee,
                 Ladder = ladder
             };
 
-            var venueData = await apiClient.GetAsync("https://docker2.aberfitness.biz/booking-facilities/api/venues");
-            var sportData = await apiClient.GetAsync("https://docker2.aberfitness.biz/booking-facilities/api/sports");
+            var venueData = await _apiClient.GetAsync("https://docker2.aberfitness.biz/booking-facilities/api/venues");
+            var sportData = await _apiClient.GetAsync("https://docker2.aberfitness.biz/booking-facilities/api/sports");
             if (!venueData.IsSuccessStatusCode || !sportData.IsSuccessStatusCode) return View(challenge);
 
             var info = await venueData.Content.ReadAsStringAsync();
@@ -92,15 +93,25 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,BookingId,ChallengedTime,Challenger,Challengee,Resolved,Result")] Challenge challenge)
+        public async Task<IActionResult> Create([Bind("ChallengedTime,Challenger,Challengee,Ladder,Result")] Challenge challenge, [Bind("VenueId")] int VenueId, [Bind("SportId")] int SportId)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(challenge);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(challenge);
+            //if (!ModelState.IsValid) return View(challenge);
+
+            if (challenge.Challengee == null || challenge.Challenger == null || challenge.Ladder == null)
+                return View(challenge);
+
+            var booking = await MakeBooking(VenueId, SportId, challenge.ChallengedTime, challenge.Challenger.UserId);
+
+            if (booking == null)
+                return View(challenge);
+
+            challenge.Created = DateTime.UtcNow;
+            _context.Add(booking);
+            challenge.Booking = booking;
+
+            _context.Add(challenge);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Details), new {challenge.Id});
         }
 
         // GET: Challenges/Edit/5
@@ -186,6 +197,17 @@ namespace ladders.Controllers
         private bool ChallengeExists(int id)
         {
             return _context.Challenge.Any(e => e.Id == id);
+        }
+
+        public async Task<Booking> MakeBooking(int venueId, int sportId, DateTime time, string userId)
+        {
+            var res = await _apiClient.PostAsync($"https://docker2.aberfitness.biz/booking-facilities/api/booking/{venueId}/{sportId}", new { bookingDateTime = time, userId = Helpers.GetMyName(User)});
+            if (!res.IsSuccessStatusCode)
+                return null;
+
+            var data = await res.Content.ReadAsStringAsync();
+
+            return JsonConvert.DeserializeObject<Booking>(data); ;
         }
     }
 }

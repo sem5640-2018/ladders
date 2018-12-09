@@ -2,7 +2,7 @@
 
 namespace ladders.Migrations
 {
-    public partial class storeresults : Migration
+    public partial class UseIds : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

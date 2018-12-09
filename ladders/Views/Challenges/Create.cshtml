@@ -13,18 +13,18 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <input asp-for="Challenger" type="hidden" />
-            <input asp-for="Challengee" type="hidden" />
-            <input asp-for="ChallengedTime" type="hidden" />
-            <input asp-for="Ladder" type="hidden" />
+            <input asp-for="Created" type="hidden" />
+            <input asp-for="Challenger.Id" type="hidden" />
+            <input asp-for="Challengee.Id" type="hidden" />
+            <input asp-for="Ladder.Id" type="hidden" />
 
             <div class="form-group">
-                @Html.LabelFor(m => m.Facility.venueId, new { @class = "control-label" })
-                @Html.DropDownList("VenueId", (IEnumerable<SelectListItem>)ViewBag.VenueId, new { @id = "venueDDL", @class = "form-control", @onchange = "updateSports(); getTimes()" })
+                <label>Venue</label>
+                @Html.DropDownList("VenueId", (IEnumerable<SelectListItem>)ViewBag.VenueId, new { @id = "venueDDL", @value = "Facility.sport.sportId", @class = "form-control", @onchange = "updateSports(); getTimes()" })
             </div>
-            
+
             <div class="form-group">
-                @Html.LabelFor(m => m.Facility.sportId, new { @class = "control-label" })
+                <label>Sport</label>
                 @Html.DropDownList("SportId", (IEnumerable<SelectListItem>)ViewBag.SportId, new { @id = "sportDDL", @class = "form-control", @onchange = "getTimes()" })
             </div>
 
@@ -39,21 +39,11 @@
             </div>
 
             <div class="form-group" id="BookingTimeForm">
-                <label asp-for="ChallengedTime" class="control-label"></label>
-                <input asp-for="ChallengedTime" class="form-control" asp-items="ViewBag.BookingDateTime" id="BookingDateTime" readonly="readonly" />
+                <label class="control-label">Picked Date</label>
+                <input asp-for="ChallengedTime" class="form-control" id="BookingDateTime" readonly="readonly" />
                 <span asp-validation-for="ChallengedTime" class="text-danger"></span>
             </div>
 
-            <div class="form-group">
-                <label asp-for="BookingId" class="control-label"></label>
-                <input asp-for="BookingId" class="form-control" />
-                <span asp-validation-for="BookingId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ChallengedTime" class="control-label"></label>
-                <input asp-for="ChallengedTime" class="form-control" />
-                <span asp-validation-for="ChallengedTime" class="text-danger"></span>
-            </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-default" />
             </div>

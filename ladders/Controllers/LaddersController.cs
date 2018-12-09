@@ -78,6 +78,8 @@ namespace ladders.Controllers
 
             if (ladderModel.ApprovalUsersList == null)
                 ladderModel.ApprovalUsersList = new List<ProfileModel>();
+            ladderModel.ApprovalUsersList.Add(me);
+            me.ApprovalLadder = ladderModel;
 
             _context.Update(me);
             _context.Update(ladderModel);
@@ -112,6 +114,7 @@ namespace ladders.Controllers
 
             var ladderModel = await _context.LadderModel
                 .Include(m => m.ApprovalUsersList)
+                .Include(m => m.CurrentRankings)
                 .Include(l => l.MemberList)
                 .FirstOrDefaultAsync(m => m.Id == id);
             var user = await _context.ProfileModel.Include(u => u.ApprovalLadder).Include(p => p.CurrentLadder).FirstOrDefaultAsync(u => u.UserId == userId);
@@ -139,9 +142,6 @@ namespace ladders.Controllers
                 };
 
                 ladderModel.CurrentRankings.Add(newRanking);
-                ladderModel.ApprovalUsersList.Add(user);
-                user.ApprovalLadder = ladderModel;
-
             }
 
             _context.Update(user);

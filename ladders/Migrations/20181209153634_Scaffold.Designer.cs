@@ -10,8 +10,8 @@ using ladders.Models;
 namespace ladders.Migrations
 {
     [DbContext(typeof(LaddersContext))]
-    [Migration("20181208121037_Challenge-Scaffold")]
-    partial class ChallengeScaffold
+    [Migration("20181209153634_Scaffold")]
+    partial class Scaffold
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,6 +20,25 @@ namespace ladders.Migrations
                 .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("ladders.Models.Booking", b =>
+                {
+                    b.Property<int>("bookingId")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("bookingDateTime");
+
+                    b.Property<int?>("facilityId");
+
+                    b.Property<string>("userId");
+
+                    b.HasKey("bookingId");
+
+                    b.HasIndex("facilityId");
+
+                    b.ToTable("Booking");
+                });
 
             modelBuilder.Entity("ladders.Models.Challenge", b =>
                 {
@@ -35,15 +54,19 @@ namespace ladders.Migrations
 
                     b.Property<int?>("ChallengerId");
 
+                    b.Property<DateTime>("Created");
+
                     b.Property<int?>("LadderId");
+
+                    b.Property<int?>("RankingId");
 
                     b.Property<bool>("Resolved");
 
                     b.Property<int>("Result");
 
-                    b.Property<int?>("facilityId");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("BookingId");
 
                     b.HasIndex("ChallengeeId");
 
@@ -51,7 +74,7 @@ namespace ladders.Migrations
 
                     b.HasIndex("LadderId");
 
-                    b.HasIndex("facilityId");
+                    b.HasIndex("RankingId");
 
                     b.ToTable("Challenge");
                 });
@@ -66,9 +89,9 @@ namespace ladders.Migrations
 
                     b.Property<bool>("isBlock");
 
-                    b.Property<int?>("sportId");
+                    b.Property<int>("sportId");
 
-                    b.Property<int?>("venueId");
+                    b.Property<int>("venueId");
 
                     b.HasKey("facilityId");
 
@@ -133,7 +156,8 @@ namespace ladders.Migrations
 
                     b.Property<int>("Draws");
 
-                    b.Property<int>("LadderModelId");
+                    b.Property<int?>("LadderModelId")
+                        .IsRequired();
 
                     b.Property<int>("Losses");
 
@@ -176,8 +200,20 @@ namespace ladders.Migrations
                     b.ToTable("Venue");
                 });
 
+            modelBuilder.Entity("ladders.Models.Booking", b =>
+                {
+                    b.HasOne("ladders.Models.Facility", "facility")
+                        .WithMany()
+                        .HasForeignKey("facilityId");
+                });
+
             modelBuilder.Entity("ladders.Models.Challenge", b =>
                 {
+                    b.HasOne("ladders.Models.Booking", "Booking")
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("ladders.Models.ProfileModel", "Challengee")
                         .WithMany()
                         .HasForeignKey("ChallengeeId");
@@ -190,20 +226,22 @@ namespace ladders.Migrations
                         .WithMany()
                         .HasForeignKey("LadderId");
 
-                    b.HasOne("ladders.Models.Facility", "Facility")
-                        .WithMany()
-                        .HasForeignKey("facilityId");
+                    b.HasOne("ladders.Models.Ranking")
+                        .WithMany("Challenges")
+                        .HasForeignKey("RankingId");
                 });
 
             modelBuilder.Entity("ladders.Models.Facility", b =>
                 {
                     b.HasOne("ladders.Models.Sport", "sport")
                         .WithMany()
-                        .HasForeignKey("sportId");
+                        .HasForeignKey("sportId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ladders.Models.Venue", "venue")
                         .WithMany()
-                        .HasForeignKey("venueId");
+                        .HasForeignKey("venueId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("ladders.Models.ProfileModel", b =>

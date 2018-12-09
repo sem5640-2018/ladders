@@ -19,6 +19,25 @@ namespace ladders.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("ladders.Models.Booking", b =>
+                {
+                    b.Property<int>("bookingId")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("bookingDateTime");
+
+                    b.Property<int?>("facilityId");
+
+                    b.Property<string>("userId");
+
+                    b.HasKey("bookingId");
+
+                    b.HasIndex("facilityId");
+
+                    b.ToTable("Booking");
+                });
+
             modelBuilder.Entity("ladders.Models.Challenge", b =>
                 {
                     b.Property<int>("Id")
@@ -33,6 +52,8 @@ namespace ladders.Migrations
 
                     b.Property<int?>("ChallengerId");
 
+                    b.Property<DateTime>("Created");
+
                     b.Property<int?>("LadderId");
 
                     b.Property<int?>("RankingId");
@@ -41,9 +62,9 @@ namespace ladders.Migrations
 
                     b.Property<int>("Result");
 
-                    b.Property<int?>("facilityId");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("BookingId");
 
                     b.HasIndex("ChallengeeId");
 
@@ -52,8 +73,6 @@ namespace ladders.Migrations
                     b.HasIndex("LadderId");
 
                     b.HasIndex("RankingId");
-
-                    b.HasIndex("facilityId");
 
                     b.ToTable("Challenge");
                 });
@@ -68,9 +87,9 @@ namespace ladders.Migrations
 
                     b.Property<bool>("isBlock");
 
-                    b.Property<int?>("sportId");
+                    b.Property<int>("sportId");
 
-                    b.Property<int?>("venueId");
+                    b.Property<int>("venueId");
 
                     b.HasKey("facilityId");
 
@@ -179,8 +198,20 @@ namespace ladders.Migrations
                     b.ToTable("Venue");
                 });
 
+            modelBuilder.Entity("ladders.Models.Booking", b =>
+                {
+                    b.HasOne("ladders.Models.Facility", "facility")
+                        .WithMany()
+                        .HasForeignKey("facilityId");
+                });
+
             modelBuilder.Entity("ladders.Models.Challenge", b =>
                 {
+                    b.HasOne("ladders.Models.Booking", "Booking")
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("ladders.Models.ProfileModel", "Challengee")
                         .WithMany()
                         .HasForeignKey("ChallengeeId");
@@ -196,21 +227,19 @@ namespace ladders.Migrations
                     b.HasOne("ladders.Models.Ranking")
                         .WithMany("Challenges")
                         .HasForeignKey("RankingId");
-
-                    b.HasOne("ladders.Models.Facility", "Facility")
-                        .WithMany()
-                        .HasForeignKey("facilityId");
                 });
 
             modelBuilder.Entity("ladders.Models.Facility", b =>
                 {
                     b.HasOne("ladders.Models.Sport", "sport")
                         .WithMany()
-                        .HasForeignKey("sportId");
+                        .HasForeignKey("sportId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ladders.Models.Venue", "venue")
                         .WithMany()
-                        .HasForeignKey("venueId");
+                        .HasForeignKey("venueId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("ladders.Models.ProfileModel", b =>

@@ -22,6 +22,7 @@ namespace ladders.Controllers
         {
             apiClient = client;
         }
+
         [HttpGet("{date}/{venueId}/{sportId}")]
         public async Task<IActionResult> GetTimes([FromRoute] DateTime date, [FromRoute] int venueId, [FromRoute] int sportId)
         {
@@ -44,7 +45,7 @@ namespace ladders.Controllers
         {
             var sportsData =
                 await apiClient.GetAsync(
-                    "https://docker2.aberfitness.biz/booking-facilities/api/sports/getSportsByVenue/" + id);
+                    $"https://docker2.aberfitness.biz/booking-facilities/api/sports/getSportsByVenue/{id}");
             if (!sportsData.IsSuccessStatusCode)
             {
                 return (NoContent());

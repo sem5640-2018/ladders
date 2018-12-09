@@ -13,7 +13,7 @@ namespace ladders.Models
 
         public virtual DateTime bookingDateTime { get; set; }
 
-        public virtual int userId { get; set; }
+        public virtual string userId { get; set; }
 
         public virtual Facility facility { get; set; }
     }
