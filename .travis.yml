@@ -1,40 +1,37 @@
 env:
-    global:
-    - secure: J2Sikca+3RsqOUYdKwLIv7YnE0qYTKovbJnEOju9C8bAtMNkOvZR/yWXFo+SgKYWLiQFsMJUSY8CAztY2rEX2iDfARJaMafYkpI1ZjVpT1NGK6L6ezcImrSoVeKkHHdXfLrP99xUgBbMwX9vwG8hZXf8ZX6j4gfCNQQtEh/JuhfzNxM53GPhKzNso1NHPiCOAUbE7SRSDpncX0i+npplCOclS2mqfcemwIrykHxEDrD3KUUTZmdIPCDLsljSacJDHCVUcgwDO8TN5z+aoX36Q0DnNj71RAH1fi7D/CTnawH/QbJjSSlfGxGq2JvaBwGmivPnMxu9cqDthwG/M1oPhA4DtO72dwL+slsR8BVfSPgyo6YSua4gRc+SvCwf61JC4VBqDoD7qxCgXFY/i1FZkGzldpeXT9dDwiMdT6MwAzI3Ah9PsRqzAIRugqhcLDOAxdH1HjIlI3f2KvF/RZJOrGJozOLLoTAvXZTqdkrr5ou1qhEU04VvMOeCkYA1Z4WUVQ0ragWVCQaN25g3fM+zDy7fQh4dOlwCnd7o2hjZkz0MKF84qHahObfBq3HgHk+0Xo27pTlym2tItMK4+x7yQaEFC0EeH670s2o06ABp4H1ApY1tO6/VCXhYoSH8ydXqVZn3qasLDPCIzytXTjE2aeev/A45uCta7zZI0CkVNbE=
-    - secure: TOzb60XnQSdPwpG2IIhYHZf2019xuCKyzdfre4W101QVbxwdPR78FDHvJ6aeYLCa4vnhjLxEQSCOhjamXdS7V98WFtOACz8Mmx+EqL+WbzY7SeE8G0GCJCTI1SYS6s0WuBXRkDQVAHd0fWxFKzD5DAM+se3rY+LFuIyCdMgzj9u6UaASdneaTcQRel0IfvCM8//NTwiK9nt3hp/m8YvVK6Ar9xghuwpwmWEz/gP6eG5UT72rx7+FD6RChlPwWVEcKJFJTFRx/c+oBVUYvSonrhVAFZ/yp0tY4bH7hQZ09qMx6wvfcVJ9ysM1X7A19FCYLNpQZ4pZw4eWyyURcB/MKEPHrQ+tB2quRNd/TgQI9kZP2zK0AnQQBG/bMn9WDElXbyMOL8GGFImuvgwy7DxFGPZE8l1WnCHdiReD8LjTKxIrdT9/a9nsSuY9ckIEGPvA0Fj8xn92XWQpRIKAfYkFa7WFX1Nw4lE+kfd/8GhcJXLws6nvVtaRN6QInNGuzei7sKV/SYYN/HqxSg1A2UO5uXphMjyhZYpfxASAa8DrDLCT7OM5gTr9eOp3JLNPb7KGgMFIg6Ekzlr7KUKAJWXEQfVE7wIiVijK6PHeTGVeJ5g7ILFV/6buO3kG5lpAokZtUl9r1k9XtLAxXnUDIyyXSGeip0lJVFaZVezG/Uem3aI=
-
+  global:
+  - secure: nfr+bkR5amyrXz37XKtr5D51DcyCTIug65+AJbBiD6u+ijeuLlELzB+Cu65QqlK7l/HfaB5eS8ZW7heal8Bwk1HoZ/vF86Z0+mzLlxVWZPl4mxHQCS3uUfK+XpiczW62K8anUNYk18Tgo18ylp+NDOjUARW9R7Pp/d7COKTt2b3J+noEYL3MXL1Y/+jpupvMbXQTie4ng9oXZ2CbqcBS5xp9YF1pWh+iv0BESu8SuJ1r+2qzlx3qvMMvkez4LAifluSmbqlSlWYen0f3SWnDMoj0SgAZrGED+V4eSrH+8pssZjFFpF0gMBLp240ZH1Swh0jqZZ9E6DwL+DBFngthLh9Ovq9mvJ6/dj3hhTzBlJGpIUcg+xDXrrE88fqlvwurSvaID57zCXGP/86Ar4YPuFlyYU1gK5ymjl/YaShLQ27dY1iYKg/XzjlrjjtHmiktGTEOnCgG+wAj02aMF+KtVbh/cp5ZzdXdyPbPWFjIHE+k2exon2bLT2i3p1USkAkLexmK5ggwiu+OVs5baorp9h/6qUTHDvilX4DuBpVbWuPlpQt8yJFUpAJN0tj+fk811hUS49EZXLuqJb9zfp0ho2gK59Hh+zOrs+3kn+cu5k/ZKVC4C5aZSiZs65/RIjJFlULWgBweGFygD2DZBve4/DAkECcIYVIjLwmDPnj8YlA=
+  - secure: XHfyVyamc+bA3Cpd5BCHGKbVzt7JdCj2rYoWUdemt0XMxYMIi7l0eL/IZ1+Ri60zsl7AISTj4wSJYr8YCZDLgXQC9821a6cKcPZ1BKcBXrB7+KjPbPYrSpkJQtOJ1UoVkazYgJhJGQcUGUjqzPSIl+crl3/63kqaIxUqUKZh048f9vAaSYY2LJ/ybA+VczXycyHadiqQojIOPIm7zSR5N6Ry73YrK3F258ls6FTmLKBGyLnnzCEq7OHlKlXTjITs+jp55LWxQ7e7DQW5+E6wpn3uHzTFBxsI18Ps2fvua9DQCBAdWJm0bvC5ShLDsKfKGfBvh0V2ZrkuMMQiCKNdgcJtcOz8zP7jlM5jn7dXK0NwTGDB8gePURoCE2YEf5oyZsQ172zNowB0HU21Z6rRqmJCxz6Oj93VJ2KUEPtOfg/zIKx/M1AX+MQRsGX5xKDQwhYMf0HZ3lR+tBmoOpsPuYkMWAC4vwk601gZPmd1RQz593Z0UTGeseBnt2DPc4ZU0I1t4SEXTFBhl7nnqb9qH3yiEvTivUPtwZxtdqb3+P/V1c0dck+h7s5SvYC+QvmD0XAb6H2TmA+RbOW59RAQyMY68oM/0Jb/sx81guWrtcOCcbt1KZYgHq0fbb7dH12nNDxeWXBnKQLpiVDCEjzQnj/V1T9mHtQlbiDIOpqJ0Ck=
+    
 stages:
-  - test
-  - name: build_staging
-    if: branch = development AND type = push
-  - name: build_release
-    if: branch = master AND type = push
-
+- test
+- name: build_staging
+  if: branch = development AND type = push
+- name: build_release
+  if: branch = master AND type = push
 jobs:
   include:
-    - stage: test
-      name: "xUnit Tests"
-      language: csharp
-      solution: ladders.sln
-      mono: none
-      dotnet: 2.1
-      script:
-        - dotnet restore
-        # - dotnet test ladderTest/ladderTest.csproj
-    - stage: build_staging
-      name: "Build docker staging image"
-      sudo: required
-      services:
-        - docker
-      script:
-        - ./bin/docker.sh staging
-    - stage: build_release
-      name: "Build docker release image"
-      sudo: required
-      services:
-        - docker
-      script:
-        - ./bin/docker.sh latest
-
+  - stage: test
+    name: xUnit Tests
+    language: csharp
+    solution: ladders.sln
+    mono: none
+    dotnet: 2.1
+    script:
+    - dotnet restore
+  - stage: build_staging
+    name: Build docker staging image
+    sudo: required
+    services:
+    - docker
+    script:
+    - "./bin/docker.sh staging"
+  - stage: build_release
+    name: Build docker release image
+    sudo: required
+    services:
+    - docker
+    script:
+    - "./bin/docker.sh latest"
 notifications:
-    slack: sem5640-2018:iSwMM5tPZh52WE5kVelricok
+  slack: sem5640-2018:iSwMM5tPZh52WE5kVelricok
