@@ -7,20 +7,31 @@
 <h2>Details</h2>
 
 <div>
-    <h4>Challenge</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.BookingId)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.BookingId)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.ChallengedTime)
+            Challenged Time
         </dt>
         <dd>
             @Html.DisplayFor(model => model.ChallengedTime)
+        </dd>
+        <dt>
+            Challenge Issued
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Created)
+        </dd>
+        <dt>
+            Venue
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Booking.facility.venue.venueName)
+        </dd>
+        <dt>
+            Sport
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Booking.facility.sport.sportName)
         </dd>
         <dt>
             @Html.DisplayNameFor(model => model.Resolved)

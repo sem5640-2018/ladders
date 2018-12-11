@@ -67,7 +67,7 @@ namespace ladders.Controllers
         {
             if (!ModelState.IsValid) return View(profileModel);
 
-            _context.Add(profileModel);
+            await _context.AddAsync(profileModel);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
