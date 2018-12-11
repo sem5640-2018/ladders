@@ -46,6 +46,14 @@
             @Html.DisplayFor(model => model.Result)
         </dd>
     </dl>
+    
+    @if (ViewBag.BeingChallenged)
+    {
+        <div>
+            <button>Accept</button>
+            <button>Concede</button>
+        </div>
+    }
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
