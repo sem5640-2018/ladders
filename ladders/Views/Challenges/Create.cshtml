@@ -12,7 +12,8 @@
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
+            
+            <input asp-for="Id" type="hidden" />
             <input asp-for="Created" type="hidden" />
             <input asp-for="Challenger.Id" type="hidden" />
             <input asp-for="Challengee.Id" type="hidden" />

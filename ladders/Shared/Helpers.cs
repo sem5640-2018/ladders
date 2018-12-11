@@ -32,5 +32,13 @@ namespace ladders.Shared
             var name = GetMyName(user);
             return await context.ProfileModel.Include(a => a.CurrentRanking).ThenInclude(lad => lad.LadderModel).FirstOrDefaultAsync(e => e.UserId == name);
         }
+
+        public static async Task<bool> EmailUser(IApiClient client, string UserId, string Subject, string Content)
+        {
+            var result = await client.PostAsync("https://docker2.aberfitness.biz/comms/api/Email/ToUser",
+                new {Subject, Content, UserId});
+
+            return result.IsSuccessStatusCode;
+        }
     }
 }
