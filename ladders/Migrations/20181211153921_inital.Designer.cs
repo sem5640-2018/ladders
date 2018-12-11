@@ -2,7 +2,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ladders.Models;
@@ -10,22 +9,20 @@ using ladders.Models;
 namespace ladders.Migrations
 {
     [DbContext(typeof(LaddersContext))]
-    [Migration("20181209153634_Scaffold")]
-    partial class Scaffold
+    [Migration("20181211153921_inital")]
+    partial class inital
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ladders.Models.Booking", b =>
                 {
                     b.Property<int>("bookingId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<DateTime>("bookingDateTime");
 
@@ -43,8 +40,7 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.Challenge", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<int>("BookingId");
 
@@ -82,8 +78,7 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.Facility", b =>
                 {
                     b.Property<int>("facilityId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("facilityName");
 
@@ -105,8 +100,7 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.LadderModel", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Name")
                         .IsRequired();
@@ -119,15 +113,14 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.ProfileModel", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<int?>("ApprovalLadderId");
 
                     b.Property<string>("Availability")
                         .IsRequired();
 
-                    b.Property<int?>("CurrentLadderId");
+                    b.Property<int?>("CurrentRankingId");
 
                     b.Property<string>("Name");
 
@@ -143,7 +136,8 @@ namespace ladders.Migrations
 
                     b.HasIndex("ApprovalLadderId");
 
-                    b.HasIndex("CurrentLadderId");
+                    b.HasIndex("CurrentRankingId")
+                        .IsUnique();
 
                     b.ToTable("ProfileModel");
                 });
@@ -151,8 +145,7 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.Ranking", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<int>("Draws");
 
@@ -161,15 +154,11 @@ namespace ladders.Migrations
 
                     b.Property<int>("Losses");
 
-                    b.Property<int>("UserId");
-
                     b.Property<int>("Wins");
 
                     b.HasKey("Id");
 
                     b.HasIndex("LadderModelId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Ranking");
                 });
@@ -177,8 +166,7 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.Sport", b =>
                 {
                     b.Property<int>("sportId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("sportName");
 
@@ -190,8 +178,7 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.Venue", b =>
                 {
                     b.Property<int>("venueId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("venueName");
 
@@ -250,9 +237,9 @@ namespace ladders.Migrations
                         .WithMany("ApprovalUsersList")
                         .HasForeignKey("ApprovalLadderId");
 
-                    b.HasOne("ladders.Models.LadderModel", "CurrentLadder")
-                        .WithMany("MemberList")
-                        .HasForeignKey("CurrentLadderId");
+                    b.HasOne("ladders.Models.Ranking", "CurrentRanking")
+                        .WithOne("User")
+                        .HasForeignKey("ladders.Models.ProfileModel", "CurrentRankingId");
                 });
 
             modelBuilder.Entity("ladders.Models.Ranking", b =>
@@ -260,11 +247,6 @@ namespace ladders.Migrations
                     b.HasOne("ladders.Models.LadderModel", "LadderModel")
                         .WithMany("CurrentRankings")
                         .HasForeignKey("LadderModelId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("ladders.Models.ProfileModel", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618

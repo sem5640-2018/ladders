@@ -5,6 +5,7 @@ namespace ladders.Models
     public class ProfileModel
     {
         [Key]
+        [Required]
         public virtual int Id { get; set; }
 
         [Required]

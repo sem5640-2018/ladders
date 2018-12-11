@@ -97,10 +97,18 @@ namespace ladders.Controllers
         {
             //if (!ModelState.IsValid) return View(challenge);
 
-            if (challenge.Challengee == null || challenge.Challenger == null || challenge.Ladder == null)
+            challenge.ChallengeeId = challenge.Challengee.Id;
+            challenge.ChallengerId = challenge.Challenger.Id;
+
+            var user = await Helpers.GetMe(User, _context);
+
+            challenge.Challenger = null;
+            challenge.Challengee = null;
+
+            if (challenge.Ladder == null)
                 return View(challenge);
 
-            var booking = await MakeBooking(VenueId, SportId, challenge.ChallengedTime, challenge.Challenger.UserId);
+            var booking = await MakeBooking(VenueId, SportId, challenge.ChallengedTime, user.UserId);
 
             if (booking == null)
                 return View(challenge);
