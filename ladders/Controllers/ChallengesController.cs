@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ladders.Models;
 using ladders.Shared;
+using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 
 namespace ladders.Controllers
 {
+    [Authorize]
     public class ChallengesController : Controller
     {
         private readonly LaddersContext _context;
@@ -25,12 +27,20 @@ namespace ladders.Controllers
         // GET: Challenges
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Challenge.ToListAsync());
+            var me = await Helpers.GetMe(User, _context);
+            ViewBag.Me = me;
+            ViewBag.IsAdmin = Helpers.AmIAdmin(User);
+            ViewBag.Challenged = _context.Challenge.Where(c => c.Challengee == me);
+            ViewBag.Challenging = _context.Challenge.Where(c => c.Challenger == me);
+
+            return View(await _context.Challenge.Where(c => c.Challenger == me || c.Challengee == me).ToListAsync());
         }
 
         // GET: Challenges/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            var me = await Helpers.GetMe(User, _context);
+            var isAdmin = Helpers.AmIAdmin(User);
             if (id == null)
             {
                 return NotFound();
@@ -38,7 +48,7 @@ namespace ladders.Controllers
 
             var challenge = await _context.Challenge
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (challenge == null)
+            if (challenge == null || !await IsValid(challenge))
             {
                 return NotFound();
             }
@@ -66,7 +76,7 @@ namespace ladders.Controllers
             {
                 ChallengedTime = DateTime.UtcNow,
                 Created = DateTime.UtcNow,
-                Resolved = true,
+                Resolved = false,
                 Challenger = await Helpers.GetMe(User, _context),
                 Challengee = challengee,
                 Ladder = ladder
@@ -117,7 +127,9 @@ namespace ladders.Controllers
             _context.Add(booking);
             challenge.Booking = booking;
 
-            _context.Add(challenge);
+            await Helpers.EmailUser(_apiClient, user.UserId, "Test", "email");
+
+            await _context.AddAsync(challenge);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Details), new {challenge.Id});
         }
@@ -131,7 +143,7 @@ namespace ladders.Controllers
             }
 
             var challenge = await _context.Challenge.FindAsync(id);
-            if (challenge == null)
+            if (challenge == null || !await IsValid(challenge))
             {
                 return NotFound();
             }
@@ -150,7 +162,7 @@ namespace ladders.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && !await IsValid(challenge))
             {
                 try
                 {
@@ -163,10 +175,8 @@ namespace ladders.Controllers
                     {
                         return NotFound();
                     }
-                    else
-                    {
-                        throw;
-                    }
+
+                    throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -216,6 +226,13 @@ namespace ladders.Controllers
             var data = await res.Content.ReadAsStringAsync();
 
             return JsonConvert.DeserializeObject<Booking>(data); ;
+        }
+
+        public async Task<bool> IsValid(Challenge challenge)
+        {
+            var me = await Helpers.GetMe(User, _context);
+            var isAdmin = Helpers.AmIAdmin(User);
+            return (challenge.Challenger == me || challenge.Challengee == me || !isAdmin);
         }
     }
 }

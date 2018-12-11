@@ -4,19 +4,16 @@
     ViewData["Title"] = "Index";
 }
 
-<h2>Index</h2>
+<h2>Outstanding Challenges</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.BookingId)
+                Challenged At
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ChallengedTime)
+                Challenge Date
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Resolved)
@@ -28,10 +25,10 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (Challenge item in ViewBag.Challenged) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.BookingId)
+                @Html.DisplayFor(modelItem => item.Created)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.ChallengedTime)
@@ -43,11 +40,66 @@
                 @Html.DisplayFor(modelItem => item.Result)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                @if (ViewBag.IsAdmin)
+                {
+                    <span>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </span>
+                }
             </td>
         </tr>
 }
+    </tbody>
+</table>
+
+<h2>Sent Challenges</h2>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            Challenged At
+        </th>
+        <th>
+            Challenge Date
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Resolved)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Result)
+        </th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (Challenge item in ViewBag.Challenging) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Created)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ChallengedTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Resolved)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Result)
+            </td>
+            <td>
+                @if (ViewBag.IsAdmin)
+                {
+                    <span>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </span>
+                }
+            </td>
+        </tr>
+    }
     </tbody>
 </table>
