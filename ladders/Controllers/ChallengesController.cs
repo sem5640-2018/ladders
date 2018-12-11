@@ -47,6 +47,12 @@ namespace ladders.Controllers
             }
 
             var challenge = await _context.Challenge
+                .Include(c => c.Booking)
+                .ThenInclude(b => b.facility)
+                .ThenInclude(f => f.sport)
+                .Include(c => c.Booking)
+                .ThenInclude(b => b.facility)
+                .ThenInclude(f => f.venue)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (challenge == null || !await IsValid(challenge))
             {
