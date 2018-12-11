@@ -36,6 +36,7 @@ namespace ladders.Controllers
 
             var ladderModel = await _context.LadderModel
                 .Include(ladder => ladder.CurrentRankings)
+                .ThenInclude(a => a.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ladderModel == null) return NotFound();
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
@@ -66,6 +67,7 @@ namespace ladders.Controllers
             var ladderModel = await _context.LadderModel
                 .Include(ladder => ladder.ApprovalUsersList)
                 .Include(ladder => ladder.CurrentRankings)
+                .ThenInclude(a => a.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ladderModel == null) return NotFound();
 
@@ -311,7 +313,7 @@ namespace ladders.Controllers
 
         private static bool IsMember(ProfileModel user, LadderModel ladder)
         {
-            return ladder.CurrentRankings?.FirstOrDefault(a => a.User == user) == null;
+            return ladder.CurrentRankings?.FirstOrDefault(a => a.User == user) != null;
         }
 
         #endregion

@@ -72,7 +72,7 @@ namespace ladders
                 // Coordinator policy allows both Coordinators and Administrators
                 options.AddPolicy("Coordinator", pb => pb.RequireClaim("user_type", "administrator", "coordinator"));
             });
-
+            
             services.AddMvc().AddRazorPagesOptions(options =>
             {
                 options.Conventions.AddPageRoute("/Ladders/Index", "");
