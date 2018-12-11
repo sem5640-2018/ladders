@@ -39,8 +39,6 @@ namespace ladders.Controllers
         // GET: Challenges/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            var me = await Helpers.GetMe(User, _context);
-            var isAdmin = Helpers.AmIAdmin(User);
             if (id == null)
             {
                 return NotFound();
@@ -58,6 +56,9 @@ namespace ladders.Controllers
             {
                 return NotFound();
             }
+
+            var me = await Helpers.GetMe(User, _context);
+            ViewBag.BeingChallenged = challenge.Challengee == me;
 
             return View(challenge);
         }
@@ -88,15 +89,11 @@ namespace ladders.Controllers
                 Ladder = ladder
             };
 
-            var venueData = await _apiClient.GetAsync("https://docker2.aberfitness.biz/booking-facilities/api/venues");
-            var sportData = await _apiClient.GetAsync("https://docker2.aberfitness.biz/booking-facilities/api/sports");
-            if (!venueData.IsSuccessStatusCode || !sportData.IsSuccessStatusCode) return View(challenge);
+            var facilities = await Helpers.GetVenues(_apiClient);
+            var sports = await Helpers.GetSports(_apiClient);
 
-            var info = await venueData.Content.ReadAsStringAsync();
-            var facilities = JsonConvert.DeserializeObject<ICollection<Venue>>(info);
-
-            info = await sportData.Content.ReadAsStringAsync();
-            var sports = JsonConvert.DeserializeObject<ICollection<Sport>>(info);
+            if (sports == null || facilities == null)
+                return RedirectToAction(nameof(Index));
 
             ViewBag.VenueId = new SelectList(facilities, "venueId", "venueName");
             ViewBag.SportId = new SelectList(sports, "sportId", "sportName");
@@ -148,11 +145,27 @@ namespace ladders.Controllers
                 return NotFound();
             }
 
-            var challenge = await _context.Challenge.FindAsync(id);
+            var challenge = await _context.Challenge
+                .Include(c => c.Challenger)
+                .Include(c => c.Challengee)
+                .Include(c => c.Booking)
+                .Include(c => c.Ladder)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
             if (challenge == null || !await IsValid(challenge))
             {
                 return NotFound();
             }
+
+            var facilities = await Helpers.GetVenues(_apiClient);
+            var sports = await Helpers.GetSports(_apiClient);
+
+            if (sports == null || facilities == null)
+                return RedirectToAction(nameof(Index));
+
+            ViewBag.VenueId = new SelectList(facilities, "venueId", "venueName");
+            ViewBag.SportId = new SelectList(sports, "sportId", "sportName");
+
             return View(challenge);
         }
 

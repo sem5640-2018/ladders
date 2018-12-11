@@ -12,28 +12,37 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+
+            <input asp-for="Id" type="hidden" />
+            <input asp-for="Created" type="hidden" />
+            <input asp-for="Challenger.Id" type="hidden" />
+            <input asp-for="Challengee.Id" type="hidden" />
+            <input asp-for="Ladder.Id" type="hidden" />
+
             <div class="form-group">
-                <label asp-for="BookingId" class="control-label"></label>
-                <input asp-for="BookingId" class="form-control" />
-                <span asp-validation-for="BookingId" class="text-danger"></span>
+                <label>Venue</label>
+                @Html.DropDownList("VenueId", (IEnumerable<SelectListItem>)ViewBag.VenueId, new { @id = "venueDDL", @value = "Facility.sport.sportId", @class = "form-control", @onchange = "updateSports(); getTimes()" })
             </div>
+
             <div class="form-group">
-                <label asp-for="ChallengedTime" class="control-label"></label>
-                <input asp-for="ChallengedTime" class="form-control" />
+                <label>Sport</label>
+                @Html.DropDownList("SportId", (IEnumerable<SelectListItem>)ViewBag.SportId, new { @id = "sportDDL", @class = "form-control", @onchange = "getTimes()" })
+            </div>
+
+            <div class="form-group">
+                <label for="BookingDateId" class="control-label">Booking Date</label>
+                <input class="form-control" type="date" id="BookingDateId" onchange="getTimes()" />
+            </div>
+
+            <div class="form-group">
+                <label for="timeDDL" class="control-label">Booking Time</label>
+                <select class="form-control" id="timeDDL" onchange="updateDateTime()"></select>
+            </div>
+
+            <div class="form-group" id="BookingTimeForm">
+                <label class="control-label">Picked Date</label>
+                <input asp-for="ChallengedTime" class="form-control" id="BookingDateTime" readonly="readonly" />
                 <span asp-validation-for="ChallengedTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="Resolved" /> @Html.DisplayNameFor(model => model.Resolved)
-                    </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label asp-for="Result" class="control-label"></label>
-                <select asp-for="Result" class="form-control"></select>
-                <span asp-validation-for="Result" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />
@@ -46,3 +55,65 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+@section Scripts {
+
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        function updateDateTime() {
+            document.getElementById("BookingDateTime").value = document.getElementById("BookingDateId").value +
+                "T" +
+                $("#timeDDL :selected").text();
+        }
+
+        function updateSports() {
+            document.getElementById("BookingDateId").value = document.getElementById("BookingDateTime").value = "";
+            $("#timeDDL").empty();
+            urlVenues = '@Url.Content("~/")' + "api/booking/getSportsByVenue" + '/' + $("#venueDDL").val();
+
+
+            $.ajax({
+                url: urlVenues,
+                success: function(json) {
+                    var items = "";
+                    $.each(json,
+                        function(i, sport) {
+                            items += "<option value='" + sport.sportId + "'>" + sport.sportName + "</option>";
+                        })
+                    $("#sportDDL").empty().html(items);
+                }
+            });
+        }
+
+        function getTimes() {
+            var urlBooking = '@Url.Content("~/")' +
+                "api/booking/" +
+                document.getElementById("BookingDateId").value +
+                "/" +
+                $("#venueDDL").val() +
+                "/" +
+                $("#sportDDL").val();
+            $.ajax({
+                url: urlBooking,
+                success: function(json) {
+                    var times = "";
+                    $("#BookingTimeForm").show();
+                    $.each(json,
+                        function(i, time) {
+                            var dout = new Date(Date.parse(time));
+                            times += "<option value='" +
+                                i +
+                                "'>" +
+                                ("0" + dout.getHours()).slice(-2) +
+                                ":00:00" +
+                                "</option>";
+                        })
+                    $("#timeDDL").empty().html(times);
+                    updateDateTime();
+                }
+            });
+        }
+
+        updateSports();
+    </script>
+}

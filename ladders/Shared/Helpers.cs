@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using ladders.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace ladders.Shared
 {
@@ -39,6 +40,26 @@ namespace ladders.Shared
                 new {Subject, Content, UserId});
 
             return result.IsSuccessStatusCode;
+        }
+
+        public static async Task<IEnumerable<Venue>> GetVenues(IApiClient apiClient)
+        {
+            var venueData = await apiClient.GetAsync("https://docker2.aberfitness.biz/booking-facilities/api/sports");
+
+            if (!venueData.IsSuccessStatusCode) return null;
+
+            var info = await venueData.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<ICollection<Venue>>(info);
+        }
+
+        public static async Task<IEnumerable<Sport>> GetSports(IApiClient apiClient)
+        {
+            var sportData = await apiClient.GetAsync("https://docker2.aberfitness.biz/booking-facilities/api/sports");
+
+            if (!sportData.IsSuccessStatusCode) return null;
+
+            var info = await sportData.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<ICollection<Sport>>(info);
         }
     }
 }
