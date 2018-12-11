@@ -30,7 +30,7 @@ namespace ladders.Shared
         public static async Task<ProfileModel> GetMe(ClaimsPrincipal user, LaddersContext context)
         {
             var name = GetMyName(user);
-            return await context.ProfileModel.FirstOrDefaultAsync(e => e.UserId == name);
+            return await context.ProfileModel.Include(a => a.CurrentRanking).ThenInclude(lad => lad.LadderModel).FirstOrDefaultAsync(e => e.UserId == name);
         }
     }
 }

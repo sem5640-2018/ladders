@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ladders.Migrations
 {
-    public partial class Scaffold : Migration
+    public partial class inital : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -13,7 +13,7 @@ namespace ladders.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
@@ -26,7 +26,7 @@ namespace ladders.Migrations
                 columns: table => new
                 {
                     sportId = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     sportName = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -39,7 +39,7 @@ namespace ladders.Migrations
                 columns: table => new
                 {
                     venueId = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     venueName = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -48,34 +48,25 @@ namespace ladders.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProfileModel",
+                name: "Ranking",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    UserId = table.Column<string>(nullable: false),
-                    Availability = table.Column<string>(nullable: false),
-                    PreferredLocation = table.Column<string>(nullable: false),
-                    Suspended = table.Column<bool>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    CurrentLadderId = table.Column<int>(nullable: true),
-                    ApprovalLadderId = table.Column<int>(nullable: true)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Wins = table.Column<int>(nullable: false),
+                    Losses = table.Column<int>(nullable: false),
+                    Draws = table.Column<int>(nullable: false),
+                    LadderModelId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProfileModel", x => x.Id);
+                    table.PrimaryKey("PK_Ranking", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProfileModel_LadderModel_ApprovalLadderId",
-                        column: x => x.ApprovalLadderId,
+                        name: "FK_Ranking_LadderModel_LadderModelId",
+                        column: x => x.LadderModelId,
                         principalTable: "LadderModel",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_ProfileModel_LadderModel_CurrentLadderId",
-                        column: x => x.CurrentLadderId,
-                        principalTable: "LadderModel",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -83,7 +74,7 @@ namespace ladders.Migrations
                 columns: table => new
                 {
                     facilityId = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     facilityName = table.Column<string>(nullable: true),
                     isBlock = table.Column<bool>(nullable: false),
                     venueId = table.Column<int>(nullable: false),
@@ -107,32 +98,34 @@ namespace ladders.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Ranking",
+                name: "ProfileModel",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    UserId = table.Column<int>(nullable: false),
-                    Wins = table.Column<int>(nullable: false),
-                    Losses = table.Column<int>(nullable: false),
-                    Draws = table.Column<int>(nullable: false),
-                    LadderModelId = table.Column<int>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<string>(nullable: false),
+                    Availability = table.Column<string>(nullable: false),
+                    PreferredLocation = table.Column<string>(nullable: false),
+                    Suspended = table.Column<bool>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    CurrentRankingId = table.Column<int>(nullable: true),
+                    ApprovalLadderId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Ranking", x => x.Id);
+                    table.PrimaryKey("PK_ProfileModel", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Ranking_LadderModel_LadderModelId",
-                        column: x => x.LadderModelId,
+                        name: "FK_ProfileModel_LadderModel_ApprovalLadderId",
+                        column: x => x.ApprovalLadderId,
                         principalTable: "LadderModel",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Ranking_ProfileModel_UserId",
-                        column: x => x.UserId,
-                        principalTable: "ProfileModel",
+                        name: "FK_ProfileModel_Ranking_CurrentRankingId",
+                        column: x => x.CurrentRankingId,
+                        principalTable: "Ranking",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -140,7 +133,7 @@ namespace ladders.Migrations
                 columns: table => new
                 {
                     bookingId = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     bookingDateTime = table.Column<DateTime>(nullable: false),
                     userId = table.Column<string>(nullable: true),
                     facilityId = table.Column<int>(nullable: true)
@@ -161,7 +154,7 @@ namespace ladders.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     ChallengerId = table.Column<int>(nullable: true),
                     ChallengeeId = table.Column<int>(nullable: true),
                     LadderId = table.Column<int>(nullable: true),
@@ -253,19 +246,15 @@ namespace ladders.Migrations
                 column: "ApprovalLadderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProfileModel_CurrentLadderId",
+                name: "IX_ProfileModel_CurrentRankingId",
                 table: "ProfileModel",
-                column: "CurrentLadderId");
+                column: "CurrentRankingId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Ranking_LadderModelId",
                 table: "Ranking",
                 column: "LadderModelId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Ranking_UserId",
-                table: "Ranking",
-                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -277,13 +266,13 @@ namespace ladders.Migrations
                 name: "Booking");
 
             migrationBuilder.DropTable(
-                name: "Ranking");
+                name: "ProfileModel");
 
             migrationBuilder.DropTable(
                 name: "Facility");
 
             migrationBuilder.DropTable(
-                name: "ProfileModel");
+                name: "Ranking");
 
             migrationBuilder.DropTable(
                 name: "Sport");

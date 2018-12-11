@@ -62,7 +62,7 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,UserId,Name,Suspended,Availability,PreferredLocation")]
+        public async Task<IActionResult> Create([Bind("UserId,Name,Suspended,Availability,PreferredLocation")]
             ProfileModel profileModel)
         {
             if (!ModelState.IsValid) return View(profileModel);
