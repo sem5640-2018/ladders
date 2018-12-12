@@ -1,4 +1,5 @@
-﻿@model ladders.Models.Challenge
+﻿@using Humanizer
+@model ladders.Models.Challenge
 
 @{
     ViewData["Title"] = "Details";
@@ -13,13 +14,13 @@
             Challenged Time
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.ChallengedTime)
+            @(Model.ChallengedTime.Humanize().Transform(To.SentenceCase)) | @Html.DisplayFor(model => model.ChallengedTime)
         </dd>
         <dt>
             Challenge Issued
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Created)
+            @(Model.Created.Humanize().Transform(To.SentenceCase)) | @Html.DisplayFor(model => model.Created)
         </dd>
         <dt>
             Venue
