@@ -52,5 +52,9 @@ namespace ladders.Models
         [Required]
         [DefaultValue(Winner.Unresolved)]
         public virtual Winner Result { get; set; }
+
+        [Required]
+        [DefaultValue(false)]
+        public virtual bool Accepted { get; set; }
     }
 }
