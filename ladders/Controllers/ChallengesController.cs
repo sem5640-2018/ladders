@@ -231,6 +231,28 @@ namespace ladders.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        public async Task<IActionResult> AcceptChallenge(int id)
+        {
+            var challenge = await _context.Challenge.FindAsync(id);
+
+            if (challenge == null)
+            {
+                return NotFound();
+            }
+
+            var me = await Helpers.GetMe(User, _context);
+
+            if (challenge.Challengee != me)
+            {
+                return NotFound();
+            }
+
+            challenge.Accepted = true;
+            _context.Challenge.Update(challenge);
+            
+            return RedirectToAction(nameof(Details), new {id});
+        }
+
         private bool ChallengeExists(int id)
         {
             return _context.Challenge.Any(e => e.Id == id);
