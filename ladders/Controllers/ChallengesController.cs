@@ -181,25 +181,23 @@ namespace ladders.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid && !await IsValid(challenge))
-            {
-                try
-                {
-                    _context.Update(challenge);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ChallengeExists(challenge.Id))
-                    {
-                        return NotFound();
-                    }
+            if (!ModelState.IsValid || await IsValid(challenge)) return View(challenge);
 
-                    throw;
-                }
-                return RedirectToAction(nameof(Index));
+            try
+            {
+                _context.Update(challenge);
+                await _context.SaveChangesAsync();
             }
-            return View(challenge);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ChallengeExists(challenge.Id))
+                {
+                    return NotFound();
+                }
+
+                throw;
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Challenges/Delete/5
@@ -242,14 +240,71 @@ namespace ladders.Controllers
 
             var me = await Helpers.GetMe(User, _context);
 
-            if (challenge.Challengee != me)
+            if (me == null || challenge.Challengee != me)
             {
                 return NotFound();
             }
 
             challenge.Accepted = true;
             _context.Challenge.Update(challenge);
+            await _context.SaveChangesAsync();
             
+            return RedirectToAction(nameof(Details), new {id});
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Concede(int id)
+        {
+            var challenge = await _context.Challenge.FindAsync(id);
+
+            if (challenge == null)
+            {
+                return NotFound();
+            }
+
+            var me = await Helpers.GetMe(User, _context);
+
+            if (me == null || challenge.Challengee != me || challenge.Accepted || challenge.Resolved)
+            {
+                return NotFound();
+            }
+
+            return View(challenge);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConcedeConfirm(int id)
+        {
+            var challenge = await _context
+                .Challenge
+                .Include(c => c.Challenger)
+                .ThenInclude(u => u.CurrentRanking)
+                .Include(c => c.Challengee)
+                .ThenInclude(u => u.CurrentRanking)
+                .Include(c => c.Booking)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (challenge == null)
+                return NotFound();
+
+            var me = await Helpers.GetMe(User, _context);
+
+            if (me == null || challenge.Challengee != me)
+                return NotFound();
+
+            await Helpers.FreeUpVenue(_apiClient, challenge.Booking.bookingId);
+
+            challenge.Accepted = true;
+            challenge.Result = Winner.Challenger;
+            challenge.Challengee.CurrentRanking.Losses++;
+            challenge.Challenger.CurrentRanking.Wins++;
+
+            _context.Challenge.Update(challenge);
+            _context.ProfileModel.Update(challenge.Challengee);
+            _context.ProfileModel.Update(challenge.Challenger);
+
+            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Details), new {id});
         }
 

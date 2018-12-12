@@ -51,7 +51,7 @@
     @if (ViewBag.BeingChallenged && !Model.Accepted)
     {
         <div>
-            <button class="btn btn-success">Accept</button>
+            <a class="btn btn-success" asp-action="AcceptChallenge" asp-route-id="@Model.Id">Accept</a>
             <button class="btn btn-warning">Re-Organise</button>
             <button class="btn btn-danger">Concede</button>
         </div>

@@ -1,0 +1,17 @@
+﻿@model ladders.Models.Challenge
+
+@{
+    ViewData["Title"] = "Concede";
+}
+
+<h2>Concede</h2>
+
+<div>
+    <h4>Are you sure you wish to concede?</h4>
+    <hr />
+    <h5>This will give the other user an automatic win.</h5>
+    <hr />
+    
+    <a class="btn btn-success" asp-action="Index"></a>
+    <a class="btn btn-danger" asp-action="Concede" asp-route-id="@Model.Id"></a>
+</div>

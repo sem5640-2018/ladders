@@ -61,5 +61,13 @@ namespace ladders.Shared
             var info = await sportData.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<ICollection<Sport>>(info);
         }
+
+        public static async Task<bool> FreeUpVenue(IApiClient apiClient, int roomId)
+        {
+            var result =
+                await apiClient.DeleteAsync("https://docker2.aberfitness.biz/booking-facilities/api/booking/" + roomId);
+
+            return result.IsSuccessStatusCode;
+        }
     }
 }

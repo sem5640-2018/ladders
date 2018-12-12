@@ -11,6 +11,7 @@ namespace ladders.Shared
     {
         Task<HttpResponseMessage> GetAsync(string path);
         Task<HttpResponseMessage> PostAsync(string path, object payload);
+        Task<HttpResponseMessage> DeleteAsync(string path);
     }
 
     public class ApiClient : IApiClient
@@ -65,6 +66,12 @@ namespace ladders.Shared
         {
             client.SetBearerToken(await GetTokenAsync());
             return await client.PostAsJsonAsync(uri, payload);
+        }
+
+        public async Task<HttpResponseMessage> DeleteAsync(string uri)
+        {
+            client.SetBearerToken(await GetTokenAsync());
+            return await client.DeleteAsync(uri);
         }
     }
 
