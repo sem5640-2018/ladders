@@ -47,11 +47,12 @@
         </dd>
     </dl>
     
-    @if (ViewBag.BeingChallenged)
+    @if (ViewBag.BeingChallenged && !Model.Accepted)
     {
         <div>
-            <button>Accept</button>
-            <button>Concede</button>
+            <button class="btn btn-success">Accept</button>
+            <button class="btn btn-warning">Re-Organise</button>
+            <button class="btn btn-danger">Concede</button>
         </div>
     }
 </div>
