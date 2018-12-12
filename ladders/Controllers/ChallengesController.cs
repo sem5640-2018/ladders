@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using ladders.Models;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace ladders.Controllers
@@ -15,8 +14,8 @@ namespace ladders.Controllers
     [Authorize]
     public class ChallengesController : Controller
     {
-        private readonly LaddersContext _context;
         private readonly IApiClient _apiClient;
+        private readonly LaddersContext _context;
 
         public ChallengesController(LaddersContext context, IApiClient client)
         {
@@ -39,10 +38,7 @@ namespace ladders.Controllers
         // GET: Challenges/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var challenge = await _context.Challenge
                 .Include(c => c.Booking)
@@ -52,10 +48,7 @@ namespace ladders.Controllers
                 .ThenInclude(b => b.facility)
                 .ThenInclude(f => f.venue)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (challenge == null || !await IsValid(challenge))
-            {
-                return NotFound();
-            }
+            if (challenge == null || !await IsValid(challenge)) return NotFound();
 
             var me = await Helpers.GetMe(User, _context);
             ViewBag.BeingChallenged = challenge.Challengee == me;
@@ -66,18 +59,12 @@ namespace ladders.Controllers
         // GET: Challenges/Create
         public async Task<IActionResult> Create(int? userId, int? ladderId)
         {
-            if (userId == null || ladderId == null)
-            {
-                return NotFound();
-            }
+            if (userId == null || ladderId == null) return NotFound();
 
             var challengee = await _context.ProfileModel.FindAsync(userId);
             var ladder = await _context.LadderModel.FindAsync(ladderId);
 
-            if (challengee == null || ladder == null)
-            {
-                return NotFound();
-            }
+            if (challengee == null || ladder == null) return NotFound();
 
             var challenge = new Challenge
             {
@@ -106,7 +93,8 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ChallengedTime,Challenger,Challengee,Ladder,Result")] Challenge challenge, [Bind("VenueId")] int VenueId, [Bind("SportId")] int SportId)
+        public async Task<IActionResult> Create([Bind("ChallengedTime,Challenger,Challengee,Ladder,Result")]
+            Challenge challenge, [Bind("VenueId")] int venueId, [Bind("SportId")] int sportId)
         {
             //if (!ModelState.IsValid) return View(challenge);
 
@@ -121,7 +109,7 @@ namespace ladders.Controllers
             if (challenge.Ladder == null)
                 return View(challenge);
 
-            var booking = await MakeBooking(VenueId, SportId, challenge.ChallengedTime, user.UserId);
+            var booking = await MakeBooking(venueId, sportId, challenge.ChallengedTime);
 
             if (booking == null)
                 return View(challenge);
@@ -140,10 +128,7 @@ namespace ladders.Controllers
         // GET: Challenges/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var challenge = await _context.Challenge
                 .Include(c => c.Challenger)
@@ -152,10 +137,7 @@ namespace ladders.Controllers
                 .Include(c => c.Ladder)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (challenge == null || !await IsValid(challenge))
-            {
-                return NotFound();
-            }
+            if (challenge == null || !await IsValid(challenge)) return NotFound();
 
             var facilities = await Helpers.GetVenues(_apiClient);
             var sports = await Helpers.GetSports(_apiClient);
@@ -174,12 +156,10 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,BookingId,ChallengedTime,Resolved,Result")] Challenge challenge)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,BookingId,ChallengedTime,Resolved,Result")]
+            Challenge challenge)
         {
-            if (id != challenge.Id)
-            {
-                return NotFound();
-            }
+            if (id != challenge.Id) return NotFound();
 
             if (!ModelState.IsValid || await IsValid(challenge)) return View(challenge);
 
@@ -190,36 +170,29 @@ namespace ladders.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ChallengeExists(challenge.Id))
-                {
-                    return NotFound();
-                }
+                if (!ChallengeExists(challenge.Id)) return NotFound();
 
                 throw;
             }
+
             return RedirectToAction(nameof(Index));
         }
 
         // GET: Challenges/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var challenge = await _context.Challenge
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (challenge == null)
-            {
-                return NotFound();
-            }
+            if (challenge == null) return NotFound();
 
             return View(challenge);
         }
 
         // POST: Challenges/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
+        [ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -233,41 +206,29 @@ namespace ladders.Controllers
         {
             var challenge = await _context.Challenge.FindAsync(id);
 
-            if (challenge == null)
-            {
-                return NotFound();
-            }
+            if (challenge == null) return NotFound();
 
             var me = await Helpers.GetMe(User, _context);
 
-            if (me == null || challenge.Challengee != me)
-            {
-                return NotFound();
-            }
+            if (me == null || challenge.Challengee != me) return NotFound();
 
             challenge.Accepted = true;
             _context.Challenge.Update(challenge);
             await _context.SaveChangesAsync();
-            
+
             return RedirectToAction(nameof(Details), new {id});
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> Concede(int id)
         {
             var challenge = await _context.Challenge.FindAsync(id);
 
-            if (challenge == null)
-            {
-                return NotFound();
-            }
+            if (challenge == null) return NotFound();
 
             var me = await Helpers.GetMe(User, _context);
 
-            if (me == null || challenge.Challengee != me || challenge.Accepted || challenge.Resolved)
-            {
-                return NotFound();
-            }
+            if (me == null || challenge.Challengee != me || challenge.Accepted || challenge.Resolved) return NotFound();
 
             return View(challenge);
         }
@@ -275,14 +236,7 @@ namespace ladders.Controllers
         [HttpGet]
         public async Task<IActionResult> ConcedeConfirm(int id)
         {
-            var challenge = await _context
-                .Challenge
-                .Include(c => c.Challenger)
-                .ThenInclude(u => u.CurrentRanking)
-                .Include(c => c.Challengee)
-                .ThenInclude(u => u.CurrentRanking)
-                .Include(c => c.Booking)
-                .FirstOrDefaultAsync(c => c.Id == id);
+            var challenge = await GetFullChallenge(id);
 
             if (challenge == null)
                 return NotFound();
@@ -293,17 +247,25 @@ namespace ladders.Controllers
                 return NotFound();
 
             await Helpers.FreeUpVenue(_apiClient, challenge.Booking.bookingId);
+            await ChallengeResolved(challenge, Winner.Challenger);
 
-            challenge.Accepted = true;
-            challenge.Result = Winner.Challenger;
-            challenge.Challengee.CurrentRanking.Losses++;
-            challenge.Challenger.CurrentRanking.Wins++;
+            return RedirectToAction(nameof(Details), new {id});
+        }
 
-            _context.Challenge.Update(challenge);
-            _context.ProfileModel.Update(challenge.Challengee);
-            _context.ProfileModel.Update(challenge.Challenger);
+        [HttpPost]
+        public async Task<IActionResult> UserLost(int id)
+        {
+            var challenge = await GetFullChallenge(id);
 
-            await _context.SaveChangesAsync();
+            if (challenge == null)
+                return NotFound();
+
+            var me = await Helpers.GetMe(User, _context);
+
+            if (me == null || challenge.Challengee != me && challenge.Challenger != me)
+                return NotFound();
+
+            await ChallengeResolved(challenge, challenge.Challengee == me ? Winner.Challenger : Winner.Challengee);
 
             return RedirectToAction(nameof(Details), new {id});
         }
@@ -313,22 +275,67 @@ namespace ladders.Controllers
             return _context.Challenge.Any(e => e.Id == id);
         }
 
-        public async Task<Booking> MakeBooking(int venueId, int sportId, DateTime time, string userId)
+        public async Task<Challenge> GetFullChallenge(int id)
         {
-            var res = await _apiClient.PostAsync($"https://docker2.aberfitness.biz/booking-facilities/api/booking/{venueId}/{sportId}", new { bookingDateTime = time, userId = Helpers.GetMyName(User)});
+            return await _context
+                .Challenge
+                .Include(c => c.Challenger)
+                .ThenInclude(u => u.CurrentRanking)
+                .Include(c => c.Challengee)
+                .ThenInclude(u => u.CurrentRanking)
+                .Include(c => c.Booking)
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<Booking> MakeBooking(int venueId, int sportId, DateTime time)
+        {
+            var res = await _apiClient.PostAsync(
+                $"https://docker2.aberfitness.biz/booking-facilities/api/booking/{venueId}/{sportId}",
+                new {bookingDateTime = time, userId = Helpers.GetMyName(User)});
             if (!res.IsSuccessStatusCode)
                 return null;
 
             var data = await res.Content.ReadAsStringAsync();
 
-            return JsonConvert.DeserializeObject<Booking>(data); ;
+            return JsonConvert.DeserializeObject<Booking>(data);
         }
 
         public async Task<bool> IsValid(Challenge challenge)
         {
             var me = await Helpers.GetMe(User, _context);
             var isAdmin = Helpers.AmIAdmin(User);
-            return (challenge.Challenger == me || challenge.Challengee == me || !isAdmin);
+            return challenge.Challenger == me || challenge.Challengee == me || !isAdmin;
+        }
+
+        public async Task<bool> ChallengeResolved(Challenge challenge, Winner winner)
+        {
+            challenge.Accepted = true;
+            challenge.Resolved = true;
+            challenge.Result = winner;
+
+            switch (winner)
+            {
+                case Winner.Challenger:
+                    challenge.Challengee.CurrentRanking.Losses++;
+                    challenge.Challenger.CurrentRanking.Wins++;
+                    break;
+                case Winner.Draw:
+                    challenge.Challengee.CurrentRanking.Draws++;
+                    challenge.Challenger.CurrentRanking.Draws++;
+                    break;
+                case Winner.Challengee:
+                    challenge.Challengee.CurrentRanking.Wins++;
+                    challenge.Challenger.CurrentRanking.Losses++;
+                    break;
+            }
+
+            _context.Challenge.Update(challenge);
+            _context.ProfileModel.Update(challenge.Challengee);
+            _context.ProfileModel.Update(challenge.Challenger);
+
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }
