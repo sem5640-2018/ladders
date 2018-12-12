@@ -1,4 +1,5 @@
-﻿@model IEnumerable<ladders.Models.Challenge>
+﻿@using Humanizer
+@model IEnumerable<ladders.Models.Challenge>
 
 @{
     ViewData["Title"] = "Index";
@@ -10,7 +11,7 @@
     <thead>
         <tr>
             <th>
-                Challenged At
+                Challenged
             </th>
             <th>
                 Challenge Date
@@ -28,10 +29,10 @@
 @foreach (Challenge item in ViewBag.Challenged) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Created)
+                @(item.Created.Humanize().Transform(To.SentenceCase))
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ChallengedTime)
+                @(item.ChallengedTime.Humanize().Transform(To.SentenceCase))
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Resolved)
@@ -60,7 +61,7 @@
     <thead>
     <tr>
         <th>
-            Challenged At
+            Challenged
         </th>
         <th>
             Challenge Date
@@ -78,10 +79,10 @@
     @foreach (Challenge item in ViewBag.Challenging) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Created)
+                @(item.Created.Humanize().Transform(To.SentenceCase))
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ChallengedTime)
+                @(item.ChallengedTime.Humanize().Transform(To.SentenceCase))
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Resolved)
