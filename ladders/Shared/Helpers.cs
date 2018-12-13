@@ -69,5 +69,26 @@ namespace ladders.Shared
 
             return result.IsSuccessStatusCode;
         }
+
+        public static bool IsUserInChallenge(IEnumerable<Challenge> model, ProfileModel user)
+        {
+            bool Check(Challenge challenge)
+            {
+                if (challenge.ChallengeeId != user.Id && challenge.ChallengerId != user.Id)
+                    return false;
+
+                return challenge.Resolved;
+            }
+
+            return model.Where(Check).Any();
+        }
+
+        public static bool Check(Challenge challenge, ProfileModel user)
+        {
+            if (challenge.ChallengeeId != user.Id && challenge.ChallengerId != user.Id)
+                return false;
+
+            return challenge.Resolved;
+        }
     }
 }
