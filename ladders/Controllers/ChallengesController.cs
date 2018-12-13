@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ladders.Models;
@@ -32,10 +33,16 @@ namespace ladders.Controllers
             var me = await Helpers.GetMe(User, _context);
             ViewBag.Me = me;
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
-            ViewBag.Challenged = _context.Challenge.Where(c => c.Challengee == me);
-            ViewBag.Challenging = _context.Challenge.Where(c => c.Challenger == me);
-
-            return View(await _context.Challenge.Where(c => c.Challenger == me || c.Challengee == me).ToListAsync());
+            
+            if (me != null)
+            {
+                ViewBag.Challenged = _context.Challenge.Where(c => c.Challengee == me); //TODO Also prop shouldn't have IQueriable used in View
+                ViewBag.Challenging = _context.Challenge.Where(c => c.Challenger == me);
+                return View(await _context.Challenge.Where(c => c.Challenger == me || c.Challengee == me).ToListAsync());
+            }
+            ViewBag.Challenged = _context.Challenge.Where(c => c.Challengee == new ProfileModel()); //TODO dirty fix (for now) for no challenges in DB
+            ViewBag.Challenging = _context.Challenge.Where(c => c.Challenger == new ProfileModel());
+            return View(new List<Challenge>());
         }
 
         // GET: Challenges/Details/5
