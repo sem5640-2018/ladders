@@ -338,6 +338,10 @@ namespace ladders.Controllers
                     break;
             }
 
+            var chalPos = challenge.Challengee.CurrentRanking.Position;
+            challenge.Challengee.CurrentRanking.Position = challenge.Challenger.CurrentRanking.Position;
+            challenge.Challenger.CurrentRanking.Position = chalPos;
+
             _context.Challenge.Update(challenge);
             _context.ProfileModel.Update(challenge.Challengee);
             _context.ProfileModel.Update(challenge.Challenger);
