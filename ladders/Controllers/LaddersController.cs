@@ -41,6 +41,7 @@ namespace ladders.Controllers
             if (ladderModel == null) return NotFound();
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
             ViewBag.Me = await Helpers.GetMe(User, _context);
+            ViewBag.challenges = _context.Challenge.Where(a => a.Ladder == ladderModel);
 
             return View(ladderModel);
         }
