@@ -20,12 +20,16 @@ namespace ladders
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public IConfiguration Configuration { get; }
+        private readonly IHostingEnvironment _environment;
+        private readonly IConfigurationSection _appConfig;
+        
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
+            _environment = env;
+            _appConfig = configuration.GetSection("ladders");
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -40,8 +44,7 @@ namespace ladders
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-
-            var appConfig = Configuration.GetSection("ladders");
+            
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             
             services.AddAuthentication(options =>
@@ -53,9 +56,9 @@ namespace ladders
                 .AddOpenIdConnect("oidc", options =>
                 {
                     options.SignInScheme = "Cookies";
-                    options.Authority = appConfig.GetValue<string>("GatekeeperUrl");
-                    options.ClientId = appConfig.GetValue<string>("ClientId");
-                    options.ClientSecret = appConfig.GetValue<string>("ClientSecret");
+                    options.Authority = _appConfig.GetValue<string>("GatekeeperUrl");
+                    options.ClientId = _appConfig.GetValue<string>("ClientId");
+                    options.ClientSecret = _appConfig.GetValue<string>("ClientSecret");
                     options.ResponseType = "code id_token";
                     options.SaveTokens = true;
                     options.GetClaimsFromUserInfoEndpoint = true;
@@ -93,10 +96,12 @@ namespace ladders
             }
             else
             {
-                app.UsePathBase("/ladders");
+                var pathBase = _appConfig.GetValue<string>("PathBase");
+                RunMigrations(app);
+                app.UsePathBase(pathBase);
                 app.Use((context, next) =>
                 {
-                    context.Request.PathBase = new PathString("/ladders");
+                    context.Request.PathBase = new PathString(pathBase);
                     return next();
                 });
                 app.UseForwardedHeaders(new ForwardedHeadersOptions
@@ -117,6 +122,16 @@ namespace ladders
                     name: "default",
                     template: "{controller=Ladders}/{action=Index}/{id?}");
             });
+        }
+        
+        private void RunMigrations(IApplicationBuilder app)
+        {
+            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                var serviceProvider = serviceScope.ServiceProvider;
+                var dbContext = serviceProvider.GetService<LaddersContext>();
+                dbContext.Database.Migrate();
+            }
         }
     }
 }
