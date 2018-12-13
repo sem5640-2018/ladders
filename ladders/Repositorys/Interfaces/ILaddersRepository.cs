@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ladders.Models;
 
-namespace ladders.Repositorys
+namespace ladders.Repositorys.Interfaces
 {
     public interface ILaddersRepository
     {

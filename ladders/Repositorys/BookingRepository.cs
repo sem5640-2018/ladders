@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ladders.Models;
+using ladders.Repositorys.Interfaces;
 
 namespace ladders.Repositorys
 {
