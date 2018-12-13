@@ -63,8 +63,13 @@ namespace ladders.Controllers
 
             var challengee = await _context.ProfileModel.FindAsync(userId);
             var ladder = await _context.LadderModel.FindAsync(ladderId);
+            var me = await Helpers.GetMe(User, _context);
 
-            if (challengee == null || ladder == null) return NotFound();
+            if (challengee == null || ladder == null || me == null) return NotFound();
+
+            if (Helpers.IsUserInChallenge(_context.Challenge, me) ||
+                Helpers.IsUserInChallenge(_context.Challenge, challengee))
+                return NotFound();
 
             var challenge = new Challenge
             {
@@ -102,6 +107,10 @@ namespace ladders.Controllers
             challenge.ChallengerId = challenge.Challenger.Id;
 
             var user = await Helpers.GetMe(User, _context);
+
+            if (Helpers.IsUserInChallenge(_context.Challenge, user) ||
+                Helpers.IsUserInChallenge(_context.Challenge, challenge.Challengee))
+                return NotFound();
 
             challenge.Challenger = null;
             challenge.Challengee = null;
