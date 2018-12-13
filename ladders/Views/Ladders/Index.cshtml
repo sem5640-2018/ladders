@@ -27,7 +27,7 @@
             </td>
             <td>
 
-                @if (ViewBag.User?.CurrentLadder != item)
+                @if (ViewBag.User?.CurrentRanking?.LadderModel != item)
                 {
                     <span>
                         <a asp-action="Join" asp-route-id="@item.Id">Join</a>

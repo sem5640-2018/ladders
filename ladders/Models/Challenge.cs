@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -12,7 +13,8 @@ namespace ladders.Models
     {
         Challenger = 1,
         Draw = 0,
-        Challengee = -1
+        Challengee = -1,
+        Unresolved = -99
     }
 
     public class Challenge
@@ -47,6 +49,12 @@ namespace ladders.Models
         [Required]
         public virtual bool Resolved { get; set; }
 
+        [Required]
+        [DefaultValue(Winner.Unresolved)]
         public virtual Winner Result { get; set; }
+
+        [Required]
+        [DefaultValue(false)]
+        public virtual bool Accepted { get; set; }
     }
 }

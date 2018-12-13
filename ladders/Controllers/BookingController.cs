@@ -7,6 +7,7 @@ using ladders.Models;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace ladders.Controllers
@@ -17,17 +18,19 @@ namespace ladders.Controllers
     public class BookingController : ControllerBase
     {
         private readonly IApiClient apiClient;
+        private readonly IConfigurationSection _appConfig;
 
-        public BookingController(IApiClient client)
+        public BookingController(IApiClient client, IConfiguration config)
         {
             apiClient = client;
+            _appConfig = config.GetSection("ladders");
         }
 
         [HttpGet("{date}/{venueId}/{sportId}")]
         public async Task<IActionResult> GetTimes([FromRoute] DateTime date, [FromRoute] int venueId, [FromRoute] int sportId)
         {
             var dateToUse = date.ToString("yyyy-MM-dd");
-            var timeData = await apiClient.GetAsync($"https://docker2.aberfitness.biz/booking-facilities/api/booking/{dateToUse}/{venueId}/{sportId}");
+            var timeData = await apiClient.GetAsync($"{_appConfig.GetValue<string>("BookingFacilitiesUrl")}api/booking/{dateToUse}/{venueId}/{sportId}");
 
             if (!timeData.IsSuccessStatusCode)
             {
@@ -45,7 +48,7 @@ namespace ladders.Controllers
         {
             var sportsData =
                 await apiClient.GetAsync(
-                    $"https://docker2.aberfitness.biz/booking-facilities/api/sports/getSportsByVenue/{id}");
+                    $"{_appConfig.GetValue<string>("BookingFacilitiesUrl")}api/sports/getSportsByVenue/{id}");
             if (!sportsData.IsSuccessStatusCode)
             {
                 return (NoContent());

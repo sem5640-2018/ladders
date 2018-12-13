@@ -6,12 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ladders.Controllers
 {
-    public class StatusController : Controller
+    public class EmailController : Controller
     {
-        [Route("api/status")]
         public IActionResult Index()
         {
-            return Ok();
+            return View();
         }
     }
 }

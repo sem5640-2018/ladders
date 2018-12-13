@@ -1,4 +1,5 @@
-﻿@model ladders.Models.LadderModel
+﻿@using ladders.Shared
+@model ladders.Models.LadderModel
 
 @{
     ViewData["Title"] = "Details";
@@ -37,26 +38,30 @@
         {
             foreach (var item in Model?.CurrentRankings.OrderByDescending(a => a.Losses).ThenBy(a => a.Draws).ThenBy(a => a.Wins))
             {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.User.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Wins)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Draws)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Losses)
-                </td>
-                <td>
-                    @if (item.User != ViewBag.Me && ViewBag.Me?.CurrentLadderId == Model.Id)
-                    {
-                        <a href="@Url.Action("Create","Challenges", new { userId = item.User.Id, ladderId = Model.Id})">Challenge</a>
-                    }
-                </td>
-            </tr>
+                if (item.User != null)
+                 {
+                     <tr>
+                         <td>
+                             @Html.DisplayFor(modelItem => item.User.Name)
+                         </td>
+                         <td>
+                             @Html.DisplayFor(modelItem => item.Wins)
+                         </td>
+                         <td>
+                             @Html.DisplayFor(modelItem => item.Draws)
+                         </td>
+                         <td>
+                             @Html.DisplayFor(modelItem => item.Losses)
+                         </td>
+                         <td>
+                             @if (item.User != ViewBag.Me && ViewBag.Me?.CurrentRanking?.LadderModel == Model
+                                  && !Helpers.IsUserInChallenge(ViewBag.challenges, item.User) && !Helpers.IsUserInChallenge(ViewBag.challenges, item.User))
+                             {
+                                 <a href="@Url.Action("Create", "Challenges", new {userId = item.User.Id, ladderId = Model.Id})">Challenge</a>
+                             }
+                         </td>
+                     </tr>
+                 }
             }
         }
         </tbody>
