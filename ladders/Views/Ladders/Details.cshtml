@@ -55,7 +55,7 @@
                          </td>
                          <td>
                              @if (item.User != ViewBag.Me && ViewBag.Me?.CurrentRanking?.LadderModel == Model
-                                  && !Helpers.Check(ViewBag.challenges, item.User) && !Helpers.Check(ViewBag.challengess, item.User))
+                                  && !Helpers.IsUserInChallenge(ViewBag.challenges, item.User) && !Helpers.IsUserInChallenge(ViewBag.challenges, item.User))
                              {
                                  <a href="@Url.Action("Create", "Challenges", new {userId = item.User.Id, ladderId = Model.Id})">Challenge</a>
                              }
