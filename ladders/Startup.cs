@@ -12,6 +12,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using ladders.Models;
+using ladders.Repositorys;
+using ladders.Repositorys.Interfaces;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -34,6 +36,11 @@ namespace ladders
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IBookingRepository, BookingRepository>();
+            services.AddScoped<IChallengesRepository, ChallengesRepository>();
+            services.AddScoped<ILaddersRepository, LadderRepository>();
+            services.AddScoped<IProfileRepository, ProfileRepository>();
+            
             services.AddHttpClient("LadderClient", client => {
             });
             services.AddSingleton<IApiClient, ApiClient>();
