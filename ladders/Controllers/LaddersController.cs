@@ -38,6 +38,7 @@ namespace ladders.Controllers
                 .Include(ladder => ladder.CurrentRankings)
                 .ThenInclude(a => a.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (ladderModel == null) return NotFound();
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
             ViewBag.Me = await Helpers.GetMe(User, _context);
@@ -137,7 +138,8 @@ namespace ladders.Controllers
                     LadderModel = ladderModel,
                     Wins = 0,
                     Draws = 0,
-                    Losses = 0
+                    Losses = 0,
+                    Position = ladderModel.CurrentRankings.Count
                 };
 
                 user.CurrentRanking = newRanking;
@@ -287,6 +289,16 @@ namespace ladders.Controllers
                 return NotFound();
 
             var rank = ladderModel.CurrentRankings.FirstOrDefault(a => a.User == user);
+
+            if (rank == null)
+                return NotFound();
+
+            var allLower = ladderModel.CurrentRankings.Where(a => a.Position > rank.Position);
+            foreach (var ranking in allLower)
+            {
+                ranking.Position--;
+            }
+
             ladderModel.CurrentRankings.Remove(rank);
             user.CurrentRanking = null;
 
