@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace ladders.Controllers
@@ -16,11 +17,13 @@ namespace ladders.Controllers
     {
         private readonly IApiClient _apiClient;
         private readonly LaddersContext _context;
+        private readonly IConfigurationSection _appConfig;
 
-        public ChallengesController(LaddersContext context, IApiClient client)
+        public ChallengesController(LaddersContext context, IApiClient client, IConfiguration config)
         {
             _context = context;
             _apiClient = client;
+            _appConfig = config.GetSection("ladders");
         }
 
         // GET: Challenges
@@ -76,8 +79,8 @@ namespace ladders.Controllers
                 Ladder = ladder
             };
 
-            var facilities = await Helpers.GetVenues(_apiClient);
-            var sports = await Helpers.GetSports(_apiClient);
+            var facilities = await Helpers.GetVenues(_appConfig.GetValue<string>("BookingFacilitiesUrl"), _apiClient);
+            var sports = await Helpers.GetSports(_appConfig.GetValue<string>("BookingFacilitiesUrl"), _apiClient);
 
             if (sports == null || facilities == null)
                 return RedirectToAction(nameof(Index));
@@ -118,7 +121,7 @@ namespace ladders.Controllers
             _context.Add(booking);
             challenge.Booking = booking;
 
-            await Helpers.EmailUser(_apiClient, user.UserId, "Test", "email");
+            await Helpers.EmailUser(_appConfig.GetValue<string>("CommsUrl"), _apiClient, user.UserId, "Test", "email");
 
             await _context.AddAsync(challenge);
             await _context.SaveChangesAsync();
@@ -139,8 +142,8 @@ namespace ladders.Controllers
 
             if (challenge == null || !await IsValid(challenge)) return NotFound();
 
-            var facilities = await Helpers.GetVenues(_apiClient);
-            var sports = await Helpers.GetSports(_apiClient);
+            var facilities = await Helpers.GetVenues(_appConfig.GetValue<string>("BookingFacilitiesUrl"), _apiClient);
+            var sports = await Helpers.GetSports(_appConfig.GetValue<string>("BookingFacilitiesUrl"), _apiClient);
 
             if (sports == null || facilities == null)
                 return RedirectToAction(nameof(Index));
@@ -246,7 +249,7 @@ namespace ladders.Controllers
             if (me == null || challenge.Challengee != me)
                 return NotFound();
 
-            await Helpers.FreeUpVenue(_apiClient, challenge.Booking.bookingId);
+            await Helpers.FreeUpVenue(_appConfig.GetValue<string>("BookingFacilitiesUrl"), _apiClient, challenge.Booking.bookingId);
             await ChallengeResolved(challenge, Winner.Challenger);
 
             return RedirectToAction(nameof(Details), new {id});
@@ -290,7 +293,7 @@ namespace ladders.Controllers
         public async Task<Booking> MakeBooking(int venueId, int sportId, DateTime time)
         {
             var res = await _apiClient.PostAsync(
-                $"https://docker2.aberfitness.biz/booking-facilities/api/booking/{venueId}/{sportId}",
+                $"{_appConfig.GetValue<string>("BookingFacilitiesUrl")}api/booking/{venueId}/{sportId}",
                 new {bookingDateTime = time, userId = Helpers.GetMyName(User)});
             if (!res.IsSuccessStatusCode)
                 return null;

@@ -34,17 +34,17 @@ namespace ladders.Shared
             return await context.ProfileModel.Include(a => a.CurrentRanking).ThenInclude(lad => lad.LadderModel).FirstOrDefaultAsync(e => e.UserId == name);
         }
 
-        public static async Task<bool> EmailUser(IApiClient client, string UserId, string Subject, string Content)
+        public static async Task<bool> EmailUser(string commsBaseUrl, IApiClient client, string UserId, string Subject, string Content)
         {
-            var result = await client.PostAsync("https://docker2.aberfitness.biz/comms/api/Email/ToUser",
+            var result = await client.PostAsync($"{commsBaseUrl}api/Email/ToUser",
                 new {Subject, Content, UserId});
 
             return result.IsSuccessStatusCode;
         }
 
-        public static async Task<IEnumerable<Venue>> GetVenues(IApiClient apiClient)
+        public static async Task<IEnumerable<Venue>> GetVenues(string bookingBaseUrl, IApiClient apiClient)
         {
-            var venueData = await apiClient.GetAsync("https://docker2.aberfitness.biz/booking-facilities/api/sports");
+            var venueData = await apiClient.GetAsync($"{bookingBaseUrl}api/sports");
 
             if (!venueData.IsSuccessStatusCode) return null;
 
@@ -52,9 +52,9 @@ namespace ladders.Shared
             return JsonConvert.DeserializeObject<ICollection<Venue>>(info);
         }
 
-        public static async Task<IEnumerable<Sport>> GetSports(IApiClient apiClient)
+        public static async Task<IEnumerable<Sport>> GetSports(string bookingBaseUrl, IApiClient apiClient)
         {
-            var sportData = await apiClient.GetAsync("https://docker2.aberfitness.biz/booking-facilities/api/sports");
+            var sportData = await apiClient.GetAsync($"{bookingBaseUrl}api/sports");
 
             if (!sportData.IsSuccessStatusCode) return null;
 
@@ -62,10 +62,10 @@ namespace ladders.Shared
             return JsonConvert.DeserializeObject<ICollection<Sport>>(info);
         }
 
-        public static async Task<bool> FreeUpVenue(IApiClient apiClient, int roomId)
+        public static async Task<bool> FreeUpVenue(string bookingBaseUrl, IApiClient apiClient, int roomId)
         {
             var result =
-                await apiClient.DeleteAsync("https://docker2.aberfitness.biz/booking-facilities/api/booking/" + roomId);
+                await apiClient.DeleteAsync($"{bookingBaseUrl}api/booking/" + roomId);
 
             return result.IsSuccessStatusCode;
         }
