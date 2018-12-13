@@ -2,7 +2,7 @@
 
 namespace ladders.Migrations
 {
-    public partial class RequireUsers : Migration
+    public partial class DefaultWinner : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

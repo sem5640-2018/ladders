@@ -1,4 +1,5 @@
-﻿@model ladders.Models.Challenge
+﻿@using Humanizer
+@model Challenge
 
 @{
     ViewData["Title"] = "Details";
@@ -7,36 +8,71 @@
 <h2>Details</h2>
 
 <div>
-    <h4>Challenge</h4>
-    <hr />
+    <hr/>
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.BookingId)
+            Challenged Time
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.BookingId)
+            @(Model.ChallengedTime.Humanize().Transform(To.SentenceCase)) | @Html.DisplayFor(model => model.ChallengedTime)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.ChallengedTime)
+            Challenge Issued
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.ChallengedTime)
+            @(Model.Created.Humanize().Transform(To.SentenceCase)) | @Html.DisplayFor(model => model.Created)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.Resolved)
+            Venue
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Resolved)
+            @Html.DisplayFor(model => model.Booking.facility.venue.venueName)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.Result)
+            Sport
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Result)
+            @Html.DisplayFor(model => model.Booking.facility.sport.sportName)
         </dd>
+        @if (Model.Resolved)
+        {
+            <dt>
+                @Html.DisplayNameFor(model => model.Resolved)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Resolved)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Result)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Result)
+            </dd>
+        }
     </dl>
+
+    @if (ViewBag.BeingChallenged && !Model.Accepted)
+    {
+        <div>
+            <a class="btn btn-success" asp-action="AcceptChallenge" asp-route-id="@Model.Id">Accept</a>
+            <button class="btn btn-warning">Re-Organise</button>
+            <button class="btn btn-danger">Concede</button>
+        </div>
+    }
+
+    @if (Model.ChallengedTime < DateTime.Now && Model.Accepted && !Model.Resolved)
+    {
+        <form >
+            <br/>
+            <h3>Let us know the result</h3>
+            <br/>
+            <input type="hidden" asp-for="Id"/>
+            <input class="btn btn-danger" type="submit" value="I Lost"/>
+            <br/>
+        </form>
+    }
+
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a class="btn btn-default" asp-action="Index">Back to List</a>
 </div>

@@ -2,7 +2,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ladders.Models;
 
@@ -16,14 +15,12 @@ namespace ladders.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ladders.Models.Booking", b =>
                 {
                     b.Property<int>("bookingId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<DateTime>("bookingDateTime");
 
@@ -41,8 +38,9 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.Challenge", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("Accepted");
 
                     b.Property<int>("BookingId");
 
@@ -80,8 +78,7 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.Facility", b =>
                 {
                     b.Property<int>("facilityId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("facilityName");
 
@@ -103,8 +100,7 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.LadderModel", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Name")
                         .IsRequired();
@@ -117,8 +113,7 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.ProfileModel", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<int?>("ApprovalLadderId");
 
@@ -142,8 +137,7 @@ namespace ladders.Migrations
                     b.HasIndex("ApprovalLadderId");
 
                     b.HasIndex("CurrentRankingId")
-                        .IsUnique()
-                        .HasFilter("[CurrentRankingId] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("ProfileModel");
                 });
@@ -151,8 +145,7 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.Ranking", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<int>("Draws");
 
@@ -160,6 +153,8 @@ namespace ladders.Migrations
                         .IsRequired();
 
                     b.Property<int>("Losses");
+
+                    b.Property<int>("Position");
 
                     b.Property<int>("Wins");
 
@@ -173,8 +168,7 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.Sport", b =>
                 {
                     b.Property<int>("sportId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("sportName");
 
@@ -186,8 +180,7 @@ namespace ladders.Migrations
             modelBuilder.Entity("ladders.Models.Venue", b =>
                 {
                     b.Property<int>("venueId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("venueName");
 

@@ -23,8 +23,11 @@ namespace ladders.Models
         [Required]
         public virtual int Draws { get; set; }
 
-        public virtual int? LadderModelId { get; set; }
+        [Required]
+        public virtual int Position { get; set; }
 
+        public virtual int? LadderModelId { get; set; }
+        
         [Required]
         public virtual LadderModel LadderModel { get; set; }
 
