@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ladders.Models;
 using ladders.Repositorys.Interfaces;
@@ -20,9 +21,34 @@ namespace ladders.Repositorys
             return await _context.LadderModel.FindAsync(id);
         }
 
-        public Task<LadderModel> GetByIdIncAsync(int id)
+        public async Task<LadderModel> GetByIdAsync(int id)
         {
-            throw new System.NotImplementedException(); //TODO Implement
+            return await _context.LadderModel
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
+        public async Task<LadderModel> GetByIdIncAllAsync(int id)
+        {
+            return  await _context.LadderModel
+                .Include(m => m.ApprovalUsersList)
+                .Include(o => o.CurrentRankings)
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
+        public async Task<LadderModel> GetByIdIncAllAndUserRankAsync(int id)
+        {
+            return  await _context.LadderModel
+                .Include(ladder => ladder.ApprovalUsersList)
+                .Include(ladder => ladder.CurrentRankings)
+                .ThenInclude(a => a.User)
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
+        public async Task<LadderModel> GetByIdIncApprovedAsync(int id)
+        {
+            return await _context.LadderModel
+                .Include(m => m.ApprovalUsersList)
+                .FirstOrDefaultAsync(m => m.Id == id);
         }
 
         public async Task<List<LadderModel>> GetAllAsync()
@@ -49,6 +75,11 @@ namespace ladders.Repositorys
             _context.LadderModel.Remove(ladder);
             await _context.SaveChangesAsync();
             return ladder;
+        }
+
+        public bool Exists(int id)
+        {
+            return _context.LadderModel.Any(l => l.Id == id);
         }
     }
 }

@@ -40,7 +40,7 @@ namespace ladders.Controllers
         // GET: Challenges
         public async Task<IActionResult> Index()
         {
-            var me = await _profileRepository.GetByNameIncAsync(Helpers.GetMyName(User));
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
             ViewBag.Me = me;
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
 
@@ -60,7 +60,7 @@ namespace ladders.Controllers
             var challenge = await _challengesRepository.GetByIdExclUserInfAsync((int) id);
             if (challenge == null || !await IsValid(challenge)) return NotFound();
 
-            var me = await _profileRepository.GetByNameIncAsync(Helpers.GetMyName(User));
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
             ViewBag.BeingChallenged = challenge.Challengee == me;
 
             return View(challenge);
@@ -73,7 +73,7 @@ namespace ladders.Controllers
 
             var challengee = await _profileRepository.FindByIdAsync((int) userId);
             var ladder = await _laddersRepository.FindByIdAsync((int) ladderId);
-            var me = await _profileRepository.GetByNameIncAsync(Helpers.GetMyName(User));
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
             if (challengee == null || ladder == null || me == null) return NotFound();
 
@@ -116,7 +116,7 @@ namespace ladders.Controllers
             challenge.ChallengeeId = challenge.Challengee.Id;
             challenge.ChallengerId = challenge.Challenger.Id;
 
-            var user = await _profileRepository.GetByNameIncAsync(Helpers.GetMyName(User));
+            var user = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
             if (Helpers.IsUserInChallenge(_context.Challenge, user) ||
                 Helpers.IsUserInChallenge(_context.Challenge, challenge.Challengee)) //TODO Resolve
@@ -218,7 +218,7 @@ namespace ladders.Controllers
 
             if (challenge == null) return NotFound();
 
-            var me = await _profileRepository.GetByNameIncAsync(Helpers.GetMyName(User));
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
             if (me == null || challenge.Challengee != me) return NotFound();
 
@@ -235,7 +235,7 @@ namespace ladders.Controllers
 
             if (challenge == null) return NotFound();
 
-            var me = await _profileRepository.GetByNameIncAsync(Helpers.GetMyName(User));
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
             if (me == null || challenge.Challengee != me || challenge.Accepted || challenge.Resolved) return NotFound();
 
@@ -250,7 +250,7 @@ namespace ladders.Controllers
             if (challenge == null)
                 return NotFound();
 
-            var me = await _profileRepository.GetByNameIncAsync(Helpers.GetMyName(User));
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
             if (me == null || challenge.Challengee != me)
                 return NotFound();
@@ -269,7 +269,7 @@ namespace ladders.Controllers
             if (challenge == null)
                 return NotFound();
 
-            var me = await _profileRepository.GetByNameIncAsync(Helpers.GetMyName(User));
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
             if (me == null || challenge.Challengee != me && challenge.Challenger != me)
                 return NotFound();
@@ -299,7 +299,7 @@ namespace ladders.Controllers
 
         public async Task<bool> IsValid(Challenge challenge)
         {
-            var me = await _profileRepository.GetByNameIncAsync(Helpers.GetMyName(User));
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
             var isAdmin = Helpers.AmIAdmin(User);
             return challenge.Challenger == me || challenge.Challengee == me || !isAdmin;
         }

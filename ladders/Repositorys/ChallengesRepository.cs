@@ -66,6 +66,11 @@ namespace ladders.Repositorys
             return _context.Challenge.Where(c => c.Challengee == challengee).ToList();
         }
 
+        public List<Challenge> GetByLadder(LadderModel ladder)
+        {
+            return _context.Challenge.Where(a => a.Ladder == ladder).ToList();
+        }
+
         public async Task<List<Challenge>> GetAllAsync()
         {
             return await _context.Challenge.ToListAsync();

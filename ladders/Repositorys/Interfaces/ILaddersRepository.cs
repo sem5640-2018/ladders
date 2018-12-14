@@ -8,7 +8,13 @@ namespace ladders.Repositorys.Interfaces
     {
         Task<LadderModel> FindByIdAsync(int id);
         
-        Task<LadderModel> GetByIdIncAsync(int id);
+        Task<LadderModel> GetByIdAsync(int id);
+        
+        Task<LadderModel> GetByIdIncAllAsync(int id);
+        
+        Task<LadderModel> GetByIdIncAllAndUserRankAsync(int id);
+        
+        Task<LadderModel> GetByIdIncApprovedAsync(int id);
         
         Task<List<LadderModel>> GetAllAsync();
 
@@ -17,5 +23,7 @@ namespace ladders.Repositorys.Interfaces
         Task<LadderModel> UpdateAsync(LadderModel ladder);
 
         Task<LadderModel> DeleteAsync(LadderModel ladder);
+
+        bool Exists(int id);
     }
 }

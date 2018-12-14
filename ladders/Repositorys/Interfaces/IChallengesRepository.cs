@@ -19,6 +19,8 @@ namespace ladders.Repositorys.Interfaces
         
         List<Challenge> GetByChallengee(ProfileModel challengee);
         
+        List<Challenge> GetByLadder(LadderModel ladder);
+        
         Task<List<Challenge>> GetAllAsync();
 
         Task<Challenge> AddAsync(Challenge challenge);
