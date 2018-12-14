@@ -75,7 +75,14 @@ namespace ladders
                     options.Scope.Add("offline_access");
                     options.ClaimActions.MapJsonKey("locale", "locale");
                     options.ClaimActions.MapJsonKey("user_type", "user_type");
+                })
+                .AddIdentityServerAuthentication("Bearer", options =>
+                {
+                    options.Authority = _appConfig.GetValue<string>("GatekeeperUrl");
+                    options.ApiName = _appConfig.GetValue<string>("ApiResourceName");
                 });
+
+
 
             services.AddAuthorization(options =>
             {
@@ -116,6 +123,7 @@ namespace ladders
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
             }
             else
             {
@@ -131,6 +139,7 @@ namespace ladders
                 {
                     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
                 });
+                app.UseExceptionHandler("/Shared/Error");
                 app.UseHsts();
             }
 
