@@ -51,6 +51,14 @@ namespace ladders.Repositories
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
+        public async Task<List<Ranking>> GetRankingsByLadderId(int id)
+        {
+            var ladder = await _context.LadderModel
+                .Include(m => m.CurrentRankings)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            return ladder.CurrentRankings.ToList();
+        }
+
         public async Task<List<LadderModel>> GetAllAsync()
         {
             return await _context.LadderModel.ToListAsync();

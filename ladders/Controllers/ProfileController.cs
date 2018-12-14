@@ -50,6 +50,18 @@ namespace ladders.Controllers
 
             var profileModel = await _profileRepository.GetByIdAsync((int) id);
             if (profileModel == null) return NotFound();
+            
+            ViewBag.Rankings = null;
+            ViewBag.OuststandingChallenges = null;
+            ViewBag.LastFiveMatch = null;
+            if (profileModel.CurrentRanking?.LadderModelId == null) return View(profileModel);
+            
+            ViewBag.Rankings =
+                await _laddersRepository.GetRankingsByLadderId((int) profileModel.CurrentRanking.LadderModelId);
+
+            ViewBag.OuststandingChallenges = _challengesRepository.GetOutstanding(profileModel.Id);
+            
+            ViewBag.LastFiveMatch = _challengesRepository.GetResolved(profileModel.Id);
 
             return View(profileModel);
         }

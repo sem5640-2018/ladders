@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -41,6 +42,7 @@ namespace ladders
             services.AddScoped<ILaddersRepository, LadderRepository>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
             
+            services.AddHttpClient();
             services.AddHttpClient("LadderClient", client => {
             });
             services.AddSingleton<IApiClient, ApiClient>();
@@ -92,6 +94,20 @@ namespace ladders
 
             services.AddDbContext<LaddersContext>(options =>
                     options.UseMySql(Configuration.GetConnectionString("LaddersContext")));
+            
+            if (!_environment.IsDevelopment())
+            {
+                services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    var proxyHost = _appConfig.GetValue("ReverseProxyHostname", "http://nginx");
+                    var proxyAddresses = Dns.GetHostAddresses(proxyHost);
+                    foreach (var ip in proxyAddresses)
+                    {
+                        options.KnownProxies.Add(ip);
+                    }
+                });
+            }
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

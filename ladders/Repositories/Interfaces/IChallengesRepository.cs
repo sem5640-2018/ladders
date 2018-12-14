@@ -20,6 +20,10 @@ namespace ladders.Repositories.Interfaces
         List<Challenge> GetByChallengee(ProfileModel challengee);
         
         List<Challenge> GetByLadder(LadderModel ladder);
+
+        List<Challenge> GetOutstanding(int userId);
+
+        List<Challenge> GetResolved(int userId);
         
         Task<List<Challenge>> GetAllAsync();
 
