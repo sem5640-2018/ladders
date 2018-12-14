@@ -72,6 +72,14 @@ namespace ladders.Repositories
             return _context.Challenge.Where(a => a.Ladder == ladder).ToList();
         }
 
+        public List<Challenge> GetByLadderActive(LadderModel ladder)
+        {
+            return _context.Challenge
+                .Include(c => c.Challenger)
+                .Include(c => c.Challengee)
+                .Where(a => a.Ladder == ladder && !a.Resolved).ToList();
+        }
+
         public List<Challenge> GetOutstanding(int userId)
         {
             return _context.Challenge
@@ -135,7 +143,7 @@ namespace ladders.Repositories
                 return challenge.Resolved;
             }
 
-            return _context.Challenge.FirstOrDefault(Check);
+            return _context.Challenge.Include(a => a.Ladder).FirstOrDefault(Check);
         }
 
         public async Task<Challenge> UserConcedeChallenge(ProfileModel user, IApiClient apiClient, string bookingUri,
@@ -163,6 +171,23 @@ namespace ladders.Repositories
             await _context.SaveChangesAsync();
 
             return challenge;
+        }
+
+        public bool IsChallengeStale(Challenge challenge)
+        {
+            if (challenge.Resolved)
+            {
+                return false;
+            }
+
+            var now = DateTime.UtcNow;
+
+            if (challenge.Accepted)
+            {
+                return (challenge.ChallengedTime > now.AddDays(7));
+            }
+
+            return challenge.Created > now.AddDays(3);
         }
     }
 }

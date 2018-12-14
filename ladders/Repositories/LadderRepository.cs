@@ -85,14 +85,14 @@ namespace ladders.Repositories
             return ladder;
         }
 
-        public async Task UpdateLadder(Challenge challenge)
+        public async Task<LadderModel> UpdateLadder(Challenge challenge)
         {
             var ladderModel = challenge.Ladder;
 
             var challenger = ladderModel.CurrentRankings.FirstOrDefault(a => a.User == challenge.Challenger);
             var challengee = ladderModel.CurrentRankings.FirstOrDefault(a => a.User == challenge.Challengee);
 
-            if (challengee == null || challenger == null) return;
+            if (challengee == null || challenger == null) return ladderModel;
             
             switch (challenge.Result)
             {
@@ -114,6 +114,8 @@ namespace ladders.Repositories
             }
 
             await _context.SaveChangesAsync();
+
+            return ladderModel;
         }
 
         public Ranking GetRankByIdAsync(LadderModel ladder, int userId)

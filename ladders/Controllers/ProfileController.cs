@@ -126,7 +126,8 @@ namespace ladders.Controllers
             var activeChallenge = _challengesRepository.GetActiveUserChallenge(profileModel);
             if (activeChallenge != null)
             {
-                await _challengesRepository.UserConcedeChallenge(profileModel,_apiClient, _appConfig.GetValue<string>("BookingFacilitiesUrl"), activeChallenge);
+                activeChallenge = await _challengesRepository.UserConcedeChallenge(profileModel, _apiClient, _appConfig.GetValue<string>("BookingFacilitiesUrl"), activeChallenge);
+                await _laddersRepository.UpdateLadder(activeChallenge);
             }
 
             try

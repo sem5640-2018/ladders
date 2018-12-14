@@ -21,6 +21,8 @@ namespace ladders.Repositories.Interfaces
         
         List<Challenge> GetByLadder(LadderModel ladder);
 
+        List<Challenge> GetByLadderActive(LadderModel ladder);
+
         List<Challenge> GetOutstanding(int userId);
 
         List<Challenge> GetResolved(int userId);
@@ -42,5 +44,7 @@ namespace ladders.Repositories.Interfaces
         Task<Challenge> UserConcedeChallenge(ProfileModel user,IApiClient apiClient, string bookingUri, Challenge challenge);
 
         Task<Challenge> UpdateWinner(Winner winner, IApiClient apiClient, string bookingUri, Challenge challenge);
+
+        bool IsChallengeStale(Challenge challenge);
     }
 }
