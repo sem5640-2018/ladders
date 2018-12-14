@@ -4,66 +4,71 @@
     ViewData["Title"] = "Users";
 }
 
-<h2>Users</h2>
-
-@if (ViewBag.IsAdmin || !ViewBag.HaveAccount)
-{
-    <p>
-        <a asp-action="Create">Create New</a>
-    </p>
-}
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Email
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Availability)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PreferredLocation)
-            </th>
-            <th>
-                Available
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CurrentRanking.LadderModel)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+<div class="card">
+    <div class="card-header">
+        <strong class="card-title">Users Registered for Ladders Service</strong>
+        @if (ViewBag.IsAdmin || !ViewBag.HaveAccount)
         {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Availability)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.PreferredLocation)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Suspended)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CurrentRanking.LadderModel)
-                </td>
-                <td>
-                    @if (ViewBag.IsAdmin || ViewBag.ID?.Equals(item.UserId))
-                    {
-                        <span><a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |</span>
-                    }
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a>
-                    @if (ViewBag.IsAdmin)
-                    {
-                        <span> | <a asp-action="Delete" asp-route-id="@item.Id">Delete</a></span>
-                    }
-                </td>
-            </tr>
+            <p>
+                <a asp-action="Create">Create New</a>
+            </p>
         }
-    </tbody>
-</table>
+    </div>
+    <div class="table-stats order-table ov-h">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>
+                    Email
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Availability)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PreferredLocation)
+                </th>
+                <th>
+                    Available
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CurrentRanking.LadderModel)
+                </th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Availability)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PreferredLocation)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Suspended)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CurrentRanking.LadderModel)
+                    </td>
+                    <td>
+                        @if (ViewBag.IsAdmin || ViewBag.ID?.Equals(item.UserId))
+                        {
+                            <span><a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |</span>
+                        }
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        @if (ViewBag.IsAdmin)
+                        {
+                            <span> | <a asp-action="Delete" asp-route-id="@item.Id">Delete</a></span>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
