@@ -92,7 +92,7 @@ namespace ladders.Shared
                 if (added == 5) return users;
 
                 var i1 = i;
-                var user = enumerable?.Where(a => a.Position == rank.Position - i1 && a.User != null)?.FirstOrDefault();
+                var user = enumerable?.Where(a => a.Position == rank.Position - i1 && a.User != null && !a.User.Suspended)?.FirstOrDefault();
 
                 if (user?.User == null)
                     continue;
