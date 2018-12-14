@@ -30,5 +30,7 @@ namespace ladders.Repositorys.Interfaces
         Task<Challenge> DeleteAsync(Challenge challenge);
 
         bool Exists(int id);
+
+        bool IsUserInChallenge(ProfileModel user);
     }
 }

@@ -5,6 +5,7 @@ using ladders.Models;
 using ladders.Repositorys.Interfaces;
 using Microsoft.AspNetCore.Internal;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace ladders.Repositorys
 {
@@ -100,6 +101,11 @@ namespace ladders.Repositorys
         public bool Exists(int id)
         {
             return _context.Challenge.Any(c => c.Id == id);
+        }
+
+        public bool IsUserInChallenge(ProfileModel user)
+        {
+            return _context.Challenge.Any(c => c.ChallengeeId == user.Id || c.ChallengerId == user.Id);
         }
     }
 }

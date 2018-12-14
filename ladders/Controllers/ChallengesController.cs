@@ -77,8 +77,8 @@ namespace ladders.Controllers
 
             if (challengee == null || ladder == null || me == null) return NotFound();
 
-            if (Helpers.IsUserInChallenge(_context.Challenge, me) ||
-                Helpers.IsUserInChallenge(_context.Challenge, challengee)) //TODO Resolve
+            if (_challengesRepository.IsUserInChallenge(me) ||
+                _challengesRepository.IsUserInChallenge(challengee))
                 return NotFound();
 
             var challenge = new Challenge
@@ -118,8 +118,8 @@ namespace ladders.Controllers
 
             var user = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
-            if (Helpers.IsUserInChallenge(_context.Challenge, user) ||
-                Helpers.IsUserInChallenge(_context.Challenge, challenge.Challengee)) //TODO Resolve
+            if (_challengesRepository.IsUserInChallenge(user) ||
+                _challengesRepository.IsUserInChallenge(challenge.Challengee))
                 return NotFound();
 
             challenge.Challenger = null;

@@ -49,7 +49,7 @@ namespace ladders.Controllers
         public async Task<IActionResult> Create()
         {
             var profileModel = new ProfileModel();
-            if (Helpers.DoIHaveAnAccount(User, _context) && !Helpers.AmIAdmin(User))
+            if (Helpers.DoIHaveAnAccount(User, _profileRepository) && !Helpers.AmIAdmin(User))
                 return await RedirectToMyProfile();
 
             profileModel.UserId = Helpers.GetMyName(User);

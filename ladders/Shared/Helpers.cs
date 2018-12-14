@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ladders.Models;
+using ladders.Repositorys.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -16,11 +17,11 @@ namespace ladders.Shared
             return user.HasClaim("user_type", "administrator") || user.HasClaim("user_type", "coordinator");
         }
 
-        public static bool DoIHaveAnAccount(ClaimsPrincipal user, LaddersContext context)
+        public static bool DoIHaveAnAccount(ClaimsPrincipal user, IProfileRepository profileRepository)
         {
             var userId = GetMyName(user);
 
-            return context.ProfileModel.Any(e => e.UserId == userId);
+            return profileRepository.Exists(userId);
         }
 
         public static string GetMyName(ClaimsPrincipal user)
