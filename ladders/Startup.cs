@@ -42,6 +42,7 @@ namespace ladders
             services.AddScoped<ILaddersRepository, LadderRepository>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
             
+            services.AddHttpClient();
             services.AddHttpClient("LadderClient", client => {
             });
             services.AddSingleton<IApiClient, ApiClient>();
