@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +13,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using ladders.Models;
+using ladders.Repositories;
+using ladders.Repositories.Interfaces;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -34,6 +37,11 @@ namespace ladders
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IBookingRepository, BookingRepository>();
+            services.AddScoped<IChallengesRepository, ChallengesRepository>();
+            services.AddScoped<ILaddersRepository, LadderRepository>();
+            services.AddScoped<IProfileRepository, ProfileRepository>();
+            
             services.AddHttpClient();
             services.AddHttpClient("LadderClient", client => {
             });
@@ -86,6 +94,20 @@ namespace ladders
 
             services.AddDbContext<LaddersContext>(options =>
                     options.UseMySql(Configuration.GetConnectionString("LaddersContext")));
+            
+            if (!_environment.IsDevelopment())
+            {
+                services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    var proxyHost = _appConfig.GetValue("ReverseProxyHostname", "http://nginx");
+                    var proxyAddresses = Dns.GetHostAddresses(proxyHost);
+                    foreach (var ip in proxyAddresses)
+                    {
+                        options.KnownProxies.Add(ip);
+                    }
+                });
+            }
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -3,53 +3,64 @@
 @{
     ViewData["Title"] = "Edit";
 }
-
-<h2>Edit Model</h2>
-<hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input asp-for="ApprovalUsersList" type="hidden" />
-            <input asp-for="CurrentRankings" type="hidden" />
-            
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+        <div class="card">
+            <div class="card-header">
+                <strong class="card-title">Edit Ladder</strong>
+                <a asp-action="Index">Back to List</a>
             </div>
+            <div class="card-body">
+                <form asp-action="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input asp-for="ApprovalUsersList" type="hidden"/>
+                    <input asp-for="CurrentRankings" type="hidden"/>
 
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-default" />
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" class="form-control"/>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <input type="hidden" asp-for="Id"/>
+                    <div class="form-group">
+                        <input type="submit" value="Save" class="btn btn-primary"/>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 </div>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Current Members</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.CurrentRankings)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.User.Name)
-                </td>
-                <td>
-                    <a asp-action="RemoveUser" asp-route-id="@item.User.Id">Remove</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <strong class="card-title">Current Members</strong>
+            </div>
+            <div class="table-stats order-table ov-h">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Current Members</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.CurrentRankings)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.User.Name)
+                            </td>
+                            <td>
+                                <a asp-action="RemoveUser" asp-route-id="@item.User.Id">Remove</a>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

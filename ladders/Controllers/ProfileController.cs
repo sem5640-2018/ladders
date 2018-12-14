@@ -1,21 +1,33 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using ladders.Models;
+using ladders.Repositories.Interfaces;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace ladders.Controllers
 {
     [Authorize]
     public class ProfileController : Controller
     {
-        private readonly LaddersContext _context;
+        private readonly IApiClient _apiClient;
+        private readonly IConfigurationSection _appConfig;
+        private readonly IProfileRepository _profileRepository;
+        private readonly ILaddersRepository _laddersRepository;
+        private readonly IChallengesRepository _challengesRepository;
 
-        public ProfileController(LaddersContext context)
+        public ProfileController(IApiClient client, IConfiguration config, 
+            IProfileRepository profileRepository, ILaddersRepository laddersRepository,
+            IChallengesRepository challengesRepository)
         {
-            _context = context;
+            _apiClient = client;
+            _appConfig = config.GetSection("ladders");
+            _profileRepository = profileRepository;
+            _laddersRepository = laddersRepository;
+            _challengesRepository = challengesRepository;
         }
 
         #region User Requests
@@ -25,9 +37,10 @@ namespace ladders.Controllers
         {
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
             ViewBag.ID = Helpers.GetMyName(User);
-            ViewBag.HaveAccount = Helpers.DoIHaveAnAccount(User, _context);
+            ViewBag.HaveAccount = _profileRepository.Exists(ViewBag.ID);
+            
 
-            return View(await _context.ProfileModel.ToListAsync());
+            return View(await _profileRepository.GetAllAsync());
         }
 
         // GET: Profile/Details/5
@@ -35,9 +48,20 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
-            var profileModel = await _context.ProfileModel
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var profileModel = await _profileRepository.GetByIdAsync((int) id);
             if (profileModel == null) return NotFound();
+            
+            ViewBag.Rankings = null;
+            ViewBag.OuststandingChallenges = null;
+            ViewBag.LastFiveMatch = null;
+            if (profileModel.CurrentRanking?.LadderModelId == null) return View(profileModel);
+            
+            ViewBag.Rankings =
+                await _laddersRepository.GetRankingsByLadderId((int) profileModel.CurrentRanking.LadderModelId);
+
+            ViewBag.OuststandingChallenges = _challengesRepository.GetOutstanding(profileModel.Id);
+            
+            ViewBag.LastFiveMatch = _challengesRepository.GetResolved(profileModel.Id);
 
             return View(profileModel);
         }
@@ -46,7 +70,7 @@ namespace ladders.Controllers
         public async Task<IActionResult> Create()
         {
             var profileModel = new ProfileModel();
-            if (Helpers.DoIHaveAnAccount(User, _context) && !Helpers.AmIAdmin(User))
+            if (Helpers.DoIHaveAnAccount(User, _profileRepository) && !Helpers.AmIAdmin(User))
                 return await RedirectToMyProfile();
 
             profileModel.UserId = Helpers.GetMyName(User);
@@ -62,13 +86,12 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserId,Name,Suspended,Availability,CurrentRankingId,ApprovalLadderId")]
+        public async Task<IActionResult> Create([Bind("UserId,Name,Suspended,Availability,PreferredLocation,CurrentRankingId,ApprovalLadderId")]
             ProfileModel profileModel)
         {
             if (!ModelState.IsValid) return View(profileModel);
 
-            await _context.AddAsync(profileModel);
-            await _context.SaveChangesAsync();
+            await _profileRepository.AddAsync(profileModel);
             return RedirectToAction(nameof(Index));
         }
 
@@ -77,7 +100,7 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
-            var profileModel = await _context.ProfileModel.FindAsync(id);
+            var profileModel = await _profileRepository.FindByIdAsync((int) id);
             if (profileModel == null) return NotFound();
 
             if (!Helpers.AmIAdmin(User) && !profileModel.UserId.Equals(Helpers.GetMyName(User))) return NotFound();
@@ -100,10 +123,15 @@ namespace ladders.Controllers
 
             if (!Helpers.AmIAdmin(User) && !profileModel.UserId.Equals(Helpers.GetMyName(User))) return NotFound();
 
+            var activeChallenge = _challengesRepository.GetActiveUserChallenge(profileModel);
+            if (activeChallenge != null)
+            {
+                await _challengesRepository.UserConcedeChallenge(profileModel,_apiClient, _appConfig.GetValue<string>("BookingFacilitiesUrl"), activeChallenge);
+            }
+
             try
             {
-                _context.Update(profileModel);
-                await _context.SaveChangesAsync();
+                await _profileRepository.UpdateAsync(profileModel);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -122,8 +150,7 @@ namespace ladders.Controllers
 
             if (id == null) return NotFound();
 
-            var profileModel = await _context.ProfileModel
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var profileModel = await _profileRepository.GetByIdAsync((int) id);
             if (profileModel == null) return NotFound();
 
             return View(profileModel);
@@ -137,9 +164,8 @@ namespace ladders.Controllers
         {
             if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
-            var profileModel = await _context.ProfileModel.FindAsync(id);
-            _context.ProfileModel.Remove(profileModel);
-            await _context.SaveChangesAsync();
+            var profileModel = await _profileRepository.FindByIdAsync(id);
+            await _profileRepository.DeleteAsync(profileModel);
             return RedirectToAction(nameof(Index));
         }
 
@@ -149,13 +175,13 @@ namespace ladders.Controllers
 
         private bool ProfileModelExists(int id)
         {
-            return _context.ProfileModel.Any(e => e.Id == id);
+            return _profileRepository.Exists(id);
         }
 
         private async Task<IActionResult> RedirectToMyProfile()
         {
             var userId = Helpers.GetMyName(User);
-            var account = await _context.ProfileModel.FirstOrDefaultAsync(e => e.UserId == userId);
+            var account = await _profileRepository.GetByUserIdAsync(userId);
             return account == null
                 ? RedirectToAction("Index", "Ladders")
                 : RedirectToAction("Details", new {id = account.Id});

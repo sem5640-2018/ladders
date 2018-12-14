@@ -4,20 +4,31 @@
     ViewData["Title"] = "Delete";
 }
 
-<h2>Remove User</h2>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <strong class="card-title">Remove User From Ladder</strong>
+            </div>
+            <div class="card-body">
+                <h3>Are you sure you want to remove this User?</h3>
+                <div>
+                    <hr />
+                    <h4>
+                        @Html.DisplayNameFor(model => model.Name) @(Model.Name)
+                    </h4>
 
-<h3>Are you sure you want to remove this User?</h3>
-<div>
-    <hr />
-    <h4>
-        @Html.DisplayNameFor(model => model.Name) @(Model.Name)
-    </h4>
+                    <br />
 
-    <br />
-
-    <form asp-action="RemoveUser">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-default" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+                    <form asp-action="RemoveUser">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="submit" value="Delete" class="btn btn-danger" /> |
+                        <a asp-action="Index">Back to List</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+

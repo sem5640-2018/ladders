@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using ladders.Models;
+using ladders.Repositories.Interfaces;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +13,16 @@ namespace ladders.Controllers
     [Authorize]
     public class LaddersController : Controller
     {
-        private readonly LaddersContext _context;
+        private readonly ILaddersRepository _laddersRepository;
+        private readonly IChallengesRepository _challengesRepository;
+        private readonly IProfileRepository _profileRepository;
 
-        public LaddersController(LaddersContext context)
+        public LaddersController(ILaddersRepository laddersRepository, IChallengesRepository challengesRepository,
+            IProfileRepository profileRepository)
         {
-            _context = context;
+            _laddersRepository = laddersRepository;
+            _challengesRepository = challengesRepository;
+            _profileRepository = profileRepository;
         }
 
         #region User Interaction
@@ -25,8 +31,8 @@ namespace ladders.Controllers
         public async Task<IActionResult> Index()
         {
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
-            ViewBag.User = await Helpers.GetMe(User, _context);
-            return View(await _context.LadderModel.ToListAsync());
+            ViewBag.User = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
+            return View(await _laddersRepository.GetAllAsync());
         }
 
         // GET: Ladders/Details/5
@@ -34,14 +40,22 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
-            var ladderModel = await _context.LadderModel
-                .Include(ladder => ladder.CurrentRankings)
-                .ThenInclude(a => a.User)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var ladderModel = await _laddersRepository.GetByIdIncAllAndUserRankAsync((int) id);
             if (ladderModel == null) return NotFound();
+
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
+            var challenges = _challengesRepository.GetByLadder(ladderModel);
+
+            if (me == null || challenges == null) return NotFound();
+
+            var rank = _laddersRepository.GetRankByIdAsync(ladderModel, me.Id);
+            
+            var challengable = rank == null ? null : Helpers.GetChallengable(challenges, ladderModel, rank);
+            ViewBag.Challengable = challengable;
+            ladderModel.CurrentRankings = ladderModel.CurrentRankings.OrderBy(l => l.Position).ToList();
+            ViewBag.Me = me;
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
-            ViewBag.Me = await Helpers.GetMe(User, _context);
-            ViewBag.challenges = _context.Challenge.Where(a => a.Ladder == ladderModel);
+            ViewBag.challenges = _challengesRepository.GetByLadder(ladderModel);
 
             return View(ladderModel);
         }
@@ -51,8 +65,7 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
-            var ladderModel = await _context.LadderModel
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var ladderModel = await _laddersRepository.GetByIdAsync((int) id);
             if (ladderModel == null) return NotFound();
 
             return View(ladderModel);
@@ -65,14 +78,10 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
-            var ladderModel = await _context.LadderModel
-                .Include(ladder => ladder.ApprovalUsersList)
-                .Include(ladder => ladder.CurrentRankings)
-                .ThenInclude(a => a.User)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var ladderModel = await _laddersRepository.GetByIdIncAllAndUserRankAsync((int) id);
             if (ladderModel == null) return NotFound();
 
-            var me = await Helpers.GetMe(User, _context);
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
             if (me == null) return RedirectToAction("Create", "Profile");
 
             if (IsMember(me, ladderModel))
@@ -83,9 +92,9 @@ namespace ladders.Controllers
             ladderModel.ApprovalUsersList.Add(me);
             me.ApprovalLadder = ladderModel;
 
-            _context.Update(me);
-            _context.Update(ladderModel);
-            await _context.SaveChangesAsync();
+            await _profileRepository.UpdateAsync(me);
+            await _laddersRepository.UpdateAsync(ladderModel);
+            
             return RedirectToAction(nameof(Details), new {id});
         }
 
@@ -96,9 +105,7 @@ namespace ladders.Controllers
 
             if (id == null) return NotFound();
 
-            var ladderModel = await _context.LadderModel
-                .Include(m => m.ApprovalUsersList)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var ladderModel = await _laddersRepository.GetByIdIncApprovedAsync((int) id);
             if (ladderModel == null) return NotFound();
 
             return View(ladderModel);
@@ -114,11 +121,8 @@ namespace ladders.Controllers
 
             if (id == null || userId == null) return NotFound();
 
-            var ladderModel = await _context.LadderModel
-                .Include(m => m.ApprovalUsersList)
-                .Include(m => m.CurrentRankings)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            var user = await _context.ProfileModel.Include(u => u.ApprovalLadder).Include(p => p.CurrentRanking).FirstOrDefaultAsync(u => u.UserId == userId);
+            var ladderModel = await _laddersRepository.GetByIdIncAllAsync((int) id);
+            var user = await _profileRepository.GetByUserIdIncAsync(userId);
 
             if (ladderModel == null || user == null) return NotFound();
 
@@ -137,16 +141,16 @@ namespace ladders.Controllers
                     LadderModel = ladderModel,
                     Wins = 0,
                     Draws = 0,
-                    Losses = 0
+                    Losses = 0,
+                    Position = ladderModel.CurrentRankings.Count
                 };
 
                 user.CurrentRanking = newRanking;
                 ladderModel.CurrentRankings.Add(newRanking);
             }
 
-            _context.Update(user);
-            _context.Update(ladderModel);
-            await _context.SaveChangesAsync();
+            await _profileRepository.UpdateAsync(user);
+            await _laddersRepository.UpdateAsync(ladderModel);
 
             return View(ladderModel);
         }
@@ -179,8 +183,7 @@ namespace ladders.Controllers
             if (!Helpers.AmIAdmin(User)) return Unauthorized();
             if (!ModelState.IsValid) return View(ladderModel);
 
-            _context.Add(ladderModel);
-            await _context.SaveChangesAsync();
+            await _laddersRepository.AddAsync(ladderModel);
             return RedirectToAction(nameof(Index));
         }
 
@@ -191,10 +194,7 @@ namespace ladders.Controllers
 
             if (id == null) return NotFound();
 
-            var ladderModel = await _context.LadderModel
-                .Include(m => m.ApprovalUsersList)
-                .Include(o => o.CurrentRankings)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var ladderModel = await _laddersRepository.GetByIdIncAllAsync((int) id);
 
             if (ladderModel == null) return NotFound();
             return View(ladderModel);
@@ -216,8 +216,7 @@ namespace ladders.Controllers
 
             try
             {
-                _context.Update(ladderModel);
-                await _context.SaveChangesAsync();
+                await _laddersRepository.UpdateAsync(ladderModel);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -236,8 +235,7 @@ namespace ladders.Controllers
 
             if (id == null) return NotFound();
 
-            var ladderModel = await _context.LadderModel
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var ladderModel = await _laddersRepository.GetByIdAsync((int) id);
             if (ladderModel == null) return NotFound();
 
             return View(ladderModel);
@@ -251,9 +249,8 @@ namespace ladders.Controllers
         {
             if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
-            var ladderModel = await _context.LadderModel.FindAsync(id);
-            _context.LadderModel.Remove(ladderModel);
-            await _context.SaveChangesAsync();
+            var ladderModel = await _laddersRepository.FindByIdAsync(id);
+            await _laddersRepository.DeleteAsync(ladderModel);
 
             return RedirectToAction(nameof(Index));
         }
@@ -264,7 +261,7 @@ namespace ladders.Controllers
 
             if (id == null) return NotFound();
 
-            var user = await _context.ProfileModel.FindAsync(id);
+            var user = await _profileRepository.FindByIdAsync((int) id);
             if (user == null) return NotFound();
             return View(user);
         }
@@ -277,7 +274,7 @@ namespace ladders.Controllers
         {
             if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
-            var user = await _context.ProfileModel.FindAsync(id);
+            var user = await _profileRepository.FindByIdAsync(id);
             if (user.CurrentRanking == null)
                 return RedirectToAction(nameof(Index));
 
@@ -287,28 +284,38 @@ namespace ladders.Controllers
                 return NotFound();
 
             var rank = ladderModel.CurrentRankings.FirstOrDefault(a => a.User == user);
+
+            if (rank == null)
+                return NotFound();
+
+            var allLower = ladderModel.CurrentRankings.Where(a => a.Position > rank.Position);
+            foreach (var ranking in allLower)
+            {
+                ranking.Position--;
+            }
+
             ladderModel.CurrentRankings.Remove(rank);
             user.CurrentRanking = null;
 
-            _context.ProfileModel.Update(user);
-            _context.LadderModel.Update(ladderModel);
-            await _context.SaveChangesAsync();
+            await _profileRepository.UpdateAsync(user);
+            await _laddersRepository.UpdateAsync(ladderModel);
 
             return RedirectToAction(nameof(Index));
         }
 
         private bool LadderModelExists(int id)
         {
-            return _context.LadderModel.Any(e => e.Id == id);
+            return _laddersRepository.Exists(id);
         }
 
         #endregion
 
         #region Help Functions
 
-        private async Task<bool> AmIMember(LadderModel ladder)
+        private async Task<bool> AmIMember(LadderModel ladder) //TODO is it needed (remove comment if it is)
         {
-            return IsMember(await Helpers.GetMe(User, _context), ladder);
+            ProfileModel user = await _profileRepository.GetByUserIdAsync(Helpers.GetMyName(User));
+            return IsMember(user, ladder);
         }
 
 

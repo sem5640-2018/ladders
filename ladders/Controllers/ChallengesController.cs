@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ladders.Models;
+using ladders.Repositories.Interfaces;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -17,32 +19,37 @@ namespace ladders.Controllers
     public class ChallengesController : Controller
     {
         private readonly IApiClient _apiClient;
-        private readonly LaddersContext _context;
         private readonly IConfigurationSection _appConfig;
+        private readonly IChallengesRepository _challengesRepository;
+        private readonly IProfileRepository _profileRepository;
+        private readonly ILaddersRepository _laddersRepository;
+        private readonly IBookingRepository _bookingRepository;
 
-        public ChallengesController(LaddersContext context, IApiClient client, IConfiguration config)
+        public ChallengesController(IApiClient client, IConfiguration config,
+            IChallengesRepository challengesRepository, IProfileRepository profileRepository,
+            ILaddersRepository laddersRepository, IBookingRepository bookingRepository)
         {
-            _context = context;
             _apiClient = client;
             _appConfig = config.GetSection("ladders");
+            _challengesRepository = challengesRepository;
+            _profileRepository = profileRepository;
+            _laddersRepository = laddersRepository;
+            _bookingRepository = bookingRepository;
         }
 
         // GET: Challenges
         public async Task<IActionResult> Index()
         {
-            var me = await Helpers.GetMe(User, _context);
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
             ViewBag.Me = me;
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
+
+            if (me == null)
+                return RedirectToAction("Create", "Profile");
             
-            if (me != null)
-            {
-                ViewBag.Challenged = _context.Challenge.Where(c => c.Challengee == me); //TODO Also prop shouldn't have IQueriable used in View
-                ViewBag.Challenging = _context.Challenge.Where(c => c.Challenger == me);
-                return View(await _context.Challenge.Where(c => c.Challenger == me || c.Challengee == me).ToListAsync());
-            }
-            ViewBag.Challenged = _context.Challenge.Where(c => c.Challengee == new ProfileModel()); //TODO dirty fix (for now) for no challenges in DB
-            ViewBag.Challenging = _context.Challenge.Where(c => c.Challenger == new ProfileModel());
-            return View(new List<Challenge>());
+            ViewBag.Challenged = _challengesRepository.GetByChallengee(me);
+            ViewBag.Challenging = _challengesRepository.GetByChallenger(me);
+            return View();
         }
 
         // GET: Challenges/Details/5
@@ -50,17 +57,10 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
-            var challenge = await _context.Challenge
-                .Include(c => c.Booking)
-                .ThenInclude(b => b.facility)
-                .ThenInclude(f => f.sport)
-                .Include(c => c.Booking)
-                .ThenInclude(b => b.facility)
-                .ThenInclude(f => f.venue)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var challenge = await _challengesRepository.GetByIdExclUserInfAsync((int) id);
             if (challenge == null || !await IsValid(challenge)) return NotFound();
 
-            var me = await Helpers.GetMe(User, _context);
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
             ViewBag.BeingChallenged = challenge.Challengee == me;
 
             return View(challenge);
@@ -71,14 +71,14 @@ namespace ladders.Controllers
         {
             if (userId == null || ladderId == null) return NotFound();
 
-            var challengee = await _context.ProfileModel.FindAsync(userId);
-            var ladder = await _context.LadderModel.FindAsync(ladderId);
-            var me = await Helpers.GetMe(User, _context);
+            var challengee = await _profileRepository.FindByIdAsync((int) userId);
+            var ladder = await _laddersRepository.FindByIdAsync((int) ladderId);
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
             if (challengee == null || ladder == null || me == null) return NotFound();
 
-            if (Helpers.IsUserInChallenge(_context.Challenge, me) ||
-                Helpers.IsUserInChallenge(_context.Challenge, challengee))
+            if (_challengesRepository.IsUserInActiveChallenge(me) ||
+                _challengesRepository.IsUserInActiveChallenge(challengee))
                 return NotFound();
 
             var challenge = new Challenge
@@ -86,7 +86,7 @@ namespace ladders.Controllers
                 ChallengedTime = DateTime.UtcNow,
                 Created = DateTime.UtcNow,
                 Resolved = false,
-                Challenger = await Helpers.GetMe(User, _context),
+                Challenger = me,
                 Challengee = challengee,
                 Ladder = ladder
             };
@@ -116,10 +116,10 @@ namespace ladders.Controllers
             challenge.ChallengeeId = challenge.Challengee.Id;
             challenge.ChallengerId = challenge.Challenger.Id;
 
-            var user = await Helpers.GetMe(User, _context);
+            var user = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
-            if (Helpers.IsUserInChallenge(_context.Challenge, user) ||
-                Helpers.IsUserInChallenge(_context.Challenge, challenge.Challengee))
+            if (_challengesRepository.IsUserInActiveChallenge(user) ||
+                _challengesRepository.IsUserInActiveChallenge(challenge.Challengee))
                 return NotFound();
 
             challenge.Challenger = null;
@@ -134,13 +134,12 @@ namespace ladders.Controllers
                 return View(challenge);
 
             challenge.Created = DateTime.UtcNow;
-            _context.Add(booking);
+            await _bookingRepository.AddAsync(booking);
             challenge.Booking = booking;
 
             await Helpers.EmailUser(_appConfig.GetValue<string>("CommsUrl"), _apiClient, user.UserId, "Test", "email");
 
-            await _context.AddAsync(challenge);
-            await _context.SaveChangesAsync();
+            await _challengesRepository.AddAsync(challenge);
             return RedirectToAction(nameof(Details), new {challenge.Id});
         }
 
@@ -149,12 +148,7 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
-            var challenge = await _context.Challenge
-                .Include(c => c.Challenger)
-                .Include(c => c.Challengee)
-                .Include(c => c.Booking)
-                .Include(c => c.Ladder)
-                .FirstOrDefaultAsync(a => a.Id == id);
+            var challenge = await _challengesRepository.GetByIdIncDirectDecentAsync((int) id);
 
             if (challenge == null || !await IsValid(challenge)) return NotFound();
 
@@ -184,8 +178,7 @@ namespace ladders.Controllers
 
             try
             {
-                _context.Update(challenge);
-                await _context.SaveChangesAsync();
+                await _challengesRepository.UpdateAsync(challenge);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -202,8 +195,7 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
-            var challenge = await _context.Challenge
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var challenge = await _challengesRepository.FindByIdAsync((int) id);
             if (challenge == null) return NotFound();
 
             return View(challenge);
@@ -215,25 +207,23 @@ namespace ladders.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var challenge = await _context.Challenge.FindAsync(id);
-            _context.Challenge.Remove(challenge);
-            await _context.SaveChangesAsync();
+            var challenge = await _challengesRepository.FindByIdAsync(id);
+            await _challengesRepository.DeleteAsync(challenge);
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> AcceptChallenge(int id)
         {
-            var challenge = await _context.Challenge.FindAsync(id);
+            var challenge = await _challengesRepository.FindByIdAsync(id);
 
             if (challenge == null) return NotFound();
 
-            var me = await Helpers.GetMe(User, _context);
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
             if (me == null || challenge.Challengee != me) return NotFound();
 
             challenge.Accepted = true;
-            _context.Challenge.Update(challenge);
-            await _context.SaveChangesAsync();
+            await _challengesRepository.UpdateAsync(challenge);
 
             return RedirectToAction(nameof(Details), new {id});
         }
@@ -241,11 +231,11 @@ namespace ladders.Controllers
         [HttpPost]
         public async Task<IActionResult> Concede(int id)
         {
-            var challenge = await _context.Challenge.FindAsync(id);
+            var challenge = await _challengesRepository.FindByIdAsync(id);
 
             if (challenge == null) return NotFound();
 
-            var me = await Helpers.GetMe(User, _context);
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
             if (me == null || challenge.Challengee != me || challenge.Accepted || challenge.Resolved) return NotFound();
 
@@ -255,18 +245,21 @@ namespace ladders.Controllers
         [HttpGet]
         public async Task<IActionResult> ConcedeConfirm(int id)
         {
-            var challenge = await GetFullChallenge(id);
+            var challenge = await _challengesRepository.GetFullChallenge(id);
 
             if (challenge == null)
                 return NotFound();
 
-            var me = await Helpers.GetMe(User, _context);
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
             if (me == null || challenge.Challengee != me)
                 return NotFound();
 
             await Helpers.FreeUpVenue(_appConfig.GetValue<string>("BookingFacilitiesUrl"), _apiClient, challenge.Booking.bookingId);
-            await ChallengeResolved(challenge, Winner.Challenger);
+
+            challenge = await _challengesRepository.UserConcedeChallenge(me, _apiClient,
+                _appConfig.GetValue<string>("BookingFacilitiesUrl"), challenge);
+            await _laddersRepository.UpdateLadder(challenge);
 
             return RedirectToAction(nameof(Details), new {id});
         }
@@ -274,36 +267,26 @@ namespace ladders.Controllers
         [HttpPost]
         public async Task<IActionResult> UserLost(int id)
         {
-            var challenge = await GetFullChallenge(id);
+            var challenge = await _challengesRepository.GetFullChallenge(id);
 
             if (challenge == null)
                 return NotFound();
 
-            var me = await Helpers.GetMe(User, _context);
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
             if (me == null || challenge.Challengee != me && challenge.Challenger != me)
                 return NotFound();
 
-            await ChallengeResolved(challenge, challenge.Challengee == me ? Winner.Challenger : Winner.Challengee);
+            challenge = await _challengesRepository.UserConcedeChallenge(me, _apiClient,
+                _appConfig.GetValue<string>("BookingFacilitiesUrl"), challenge);
+            await _laddersRepository.UpdateLadder(challenge);
 
             return RedirectToAction(nameof(Details), new {id});
         }
 
         private bool ChallengeExists(int id)
         {
-            return _context.Challenge.Any(e => e.Id == id);
-        }
-
-        public async Task<Challenge> GetFullChallenge(int id)
-        {
-            return await _context
-                .Challenge
-                .Include(c => c.Challenger)
-                .ThenInclude(u => u.CurrentRanking)
-                .Include(c => c.Challengee)
-                .ThenInclude(u => u.CurrentRanking)
-                .Include(c => c.Booking)
-                .FirstOrDefaultAsync(c => c.Id == id);
+            return _challengesRepository.Exists(id);
         }
 
         public async Task<Booking> MakeBooking(int venueId, int sportId, DateTime time)
@@ -321,44 +304,9 @@ namespace ladders.Controllers
 
         public async Task<bool> IsValid(Challenge challenge)
         {
-            var me = await Helpers.GetMe(User, _context);
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
             var isAdmin = Helpers.AmIAdmin(User);
             return challenge.Challenger == me || challenge.Challengee == me || !isAdmin;
-        }
-
-        public async Task<bool> ChallengeResolved(Challenge challenge, Winner winner)
-        {
-            challenge.Accepted = true;
-            challenge.Resolved = true;
-            challenge.Result = winner;
-
-            switch (winner)
-            {
-                case Winner.Challenger:
-                    challenge.Challengee.CurrentRanking.Losses++;
-                    challenge.Challenger.CurrentRanking.Wins++;
-                    break;
-                case Winner.Draw:
-                    challenge.Challengee.CurrentRanking.Draws++;
-                    challenge.Challenger.CurrentRanking.Draws++;
-                    break;
-                case Winner.Challengee:
-                    challenge.Challengee.CurrentRanking.Wins++;
-                    challenge.Challenger.CurrentRanking.Losses++;
-                    break;
-            }
-
-            var chalPos = challenge.Challengee.CurrentRanking.Position;
-            challenge.Challengee.CurrentRanking.Position = challenge.Challenger.CurrentRanking.Position;
-            challenge.Challenger.CurrentRanking.Position = chalPos;
-
-            _context.Challenge.Update(challenge);
-            _context.ProfileModel.Update(challenge.Challengee);
-            _context.ProfileModel.Update(challenge.Challenger);
-
-            await _context.SaveChangesAsync();
-
-            return true;
         }
     }
 }
