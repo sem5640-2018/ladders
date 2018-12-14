@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ladders.Models;
 using ladders.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace ladders.Shared
