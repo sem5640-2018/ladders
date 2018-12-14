@@ -26,6 +26,8 @@ namespace ladders.Repositories.Interfaces
 
         Task<LadderModel> DeleteAsync(LadderModel ladder);
 
+        Ranking GetRankByIdAsync(LadderModel ladder, int userId);
+
         bool Exists(int id);
     }
 }

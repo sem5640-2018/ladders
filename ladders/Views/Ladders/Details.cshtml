@@ -63,8 +63,7 @@
                                             @Html.DisplayFor(modelItem => item.Losses)
                                         </td>
                                         <td>
-                                            @if (item.User != ViewBag.Me && ViewBag.Me?.CurrentRanking?.LadderModel == Model
-                                                 && !Helpers.IsUserInActiveChallenge(ViewBag.challenges, item.User) && !Helpers.IsUserInActiveChallenge(ViewBag.challenges, item.User))
+                                            @if (ViewBag.Challengable != null && ViewBag.Challengable.ContainsKey(item.User.Name))
                                             {
                                                 <a href="@Url.Action("Create", "Challenges", new {userId = item.User.Id, ladderId = Model.Id})">Challenge</a>
                                             }
