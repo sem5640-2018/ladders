@@ -32,31 +32,33 @@
     </div>
 </div>
 <div class="row">
-    <div class="card">
-        <div class="card-header">
-            <strong class="card-title">Current Members</strong>
-        </div>
-        <div class="table-stats order-table ov-h">
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Current Members</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach (var item in Model.CurrentRankings)
-                {
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <strong class="card-title">Current Members</strong>
+            </div>
+            <div class="table-stats order-table ov-h">
+                <table class="table">
+                    <thead>
                     <tr>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.User.Name)
-                        </td>
-                        <td>
-                            <a asp-action="RemoveUser" asp-route-id="@item.User.Id">Remove</a>
-                        </td>
+                        <th>Current Members</th>
                     </tr>
-                }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.CurrentRankings)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.User.Name)
+                            </td>
+                            <td>
+                                <a asp-action="RemoveUser" asp-route-id="@item.User.Id">Remove</a>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
