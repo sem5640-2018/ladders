@@ -16,8 +16,6 @@ namespace ladders.Controllers
         private readonly ILaddersRepository _laddersRepository;
         private readonly IChallengesRepository _challengesRepository;
         private readonly IProfileRepository _profileRepository;
-        
-        
 
         public LaddersController(ILaddersRepository laddersRepository, IChallengesRepository challengesRepository,
             IProfileRepository profileRepository)
