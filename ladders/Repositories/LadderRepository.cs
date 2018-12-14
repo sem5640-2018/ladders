@@ -77,6 +77,11 @@ namespace ladders.Repositories
             return ladder;
         }
 
+        public Ranking GetRankByIdAsync(LadderModel ladder, int userId)
+        {
+            return ladder.CurrentRankings.FirstOrDefault(a => a?.User?.Id == userId);
+        }
+
         public bool Exists(int id)
         {
             return _context.LadderModel.Any(l => l.Id == id);

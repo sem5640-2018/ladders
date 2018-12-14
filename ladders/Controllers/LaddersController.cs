@@ -41,11 +41,20 @@ namespace ladders.Controllers
             if (id == null) return NotFound();
 
             var ladderModel = await _laddersRepository.GetByIdIncAllAndUserRankAsync((int) id);
-
             if (ladderModel == null) return NotFound();
+
+            var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
+            var challenges = _challengesRepository.GetByLadder(ladderModel);
+
+            if (me == null || challenges == null) return NotFound();
+
+            var rank = _laddersRepository.GetRankByIdAsync(ladderModel, me.Id);
+            
+            var challengable = rank == null ? null : Helpers.GetChallengable(challenges, ladderModel, rank);
+            ViewBag.Challengable = challengable;
             ladderModel.CurrentRankings = ladderModel.CurrentRankings.OrderBy(l => l.Position).ToList();
+            ViewBag.Me = me;
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
-            ViewBag.Me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
             ViewBag.challenges = _challengesRepository.GetByLadder(ladderModel);
 
             return View(ladderModel);
