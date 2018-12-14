@@ -161,7 +161,7 @@ namespace ladders
                     template: "{controller=Ladders}/{action=Index}/{id?}");
             });
 
-            RecurringJob.AddOrUpdate<EmailManager>(es => es.SendScheduledEmails(), Cron.Minutely);
+            RecurringJob.AddOrUpdate<EmailManager>(es => es.SendScheduledEmails(), Cron.Weekly);
         }
         
         private void RunMigrations(IApplicationBuilder app)
