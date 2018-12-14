@@ -164,5 +164,22 @@ namespace ladders.Repositories
 
             return challenge;
         }
+
+        public bool IsChallengeStale(Challenge challenge)
+        {
+            if (challenge.Resolved)
+            {
+                return false;
+            }
+
+            var now = DateTime.UtcNow;
+
+            if (challenge.Accepted)
+            {
+                return (challenge.ChallengedTime > now.AddDays(7));
+            }
+
+            return challenge.Created > now.AddDays(3);
+        }
     }
 }
