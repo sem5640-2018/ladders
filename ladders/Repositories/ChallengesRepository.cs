@@ -184,10 +184,10 @@ namespace ladders.Repositories
 
             if (challenge.Accepted)
             {
-                return (challenge.ChallengedTime > now.AddDays(7));
+                return challenge.ChallengedTime < now.AddDays(-7);
             }
 
-            return challenge.Created > now.AddDays(3);
+            return challenge.Created < now.AddDays(-3) && challenge.ChallengedTime > now;
         }
     }
 }
