@@ -2,14 +2,22 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ladders.Models;
 using ladders.Repositorys.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace ladders.Repositorys
 {
     public class BookingRepository : IBookingRepository
     {
-        public Task<Booking> FindByIdAsync(int id)
+        private readonly LaddersContext _context;
+
+        public BookingRepository(LaddersContext context)
         {
-            throw new System.NotImplementedException();
+            _context = context;
+        }
+        
+        public async Task<Booking> FindByIdAsync(int id)
+        {
+            return await _context.Booking.FindAsync(id);
         }
 
         public Task<Booking> GetByIdIncAsync(int id)
@@ -17,24 +25,30 @@ namespace ladders.Repositorys
             throw new System.NotImplementedException();
         }
 
-        public Task<List<Booking>> GetAllAsync()
+        public async Task<List<Booking>> GetAllAsync()
         {
-            throw new System.NotImplementedException();
+            return await _context.Booking.ToListAsync();
         }
 
-        public Task<Booking> AddAsync(Booking booking)
+        public async Task<Booking> AddAsync(Booking booking)
         {
-            throw new System.NotImplementedException();
+            _context.Booking.Add(booking);
+            await _context.SaveChangesAsync();
+            return booking;
         }
 
-        public Task<Booking> UpdateAsync(Booking booking)
+        public async Task<Booking> UpdateAsync(Booking booking)
         {
-            throw new System.NotImplementedException();
+            _context.Booking.Update(booking);
+            await _context.SaveChangesAsync();
+            return booking;
         }
 
-        public Task<Booking> DeleteAsync(Booking booking)
+        public async Task<Booking> DeleteAsync(Booking booking)
         {
-            throw new System.NotImplementedException();
+            _context.Booking.Remove(booking);
+            await _context.SaveChangesAsync();
+            return booking;
         }
     }
 }

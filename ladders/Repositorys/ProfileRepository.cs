@@ -2,39 +2,60 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ladders.Models;
 using ladders.Repositorys.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace ladders.Repositorys
 {
     public class ProfileRepository : IProfileRepository
     {
-        public Task<ProfileModel> FindByIdAsync(int id)
+        private readonly LaddersContext _context;
+        
+        public ProfileRepository(LaddersContext context)
         {
-            throw new System.NotImplementedException();
+            _context = context;
+        }
+        
+        public async Task<ProfileModel> FindByIdAsync(int id)
+        {
+            return await _context.ProfileModel.FindAsync(id);
         }
 
-        public Task<ProfileModel> GetByIdIncAsync(int id)
+        public async Task<ProfileModel> GetByNameIncAsync(string name)
         {
-            throw new System.NotImplementedException();
+            return await _context.ProfileModel.Include(a => a.CurrentRanking).ThenInclude(lad => lad.LadderModel).FirstOrDefaultAsync(e => e.UserId == name);
         }
 
-        public Task<List<ProfileModel>> GetAllAsync()
+        public async Task<List<ProfileModel>> GetAllAsync()
         {
-            throw new System.NotImplementedException();
+            return await _context.ProfileModel.ToListAsync();
         }
 
-        public Task<ProfileModel> AddAsync(ProfileModel profile)
+        public async Task<ProfileModel> AddAsync(ProfileModel profile)
         {
-            throw new System.NotImplementedException();
+            _context.ProfileModel.Add(profile);
+            await _context.SaveChangesAsync();
+            return profile;
         }
 
-        public Task<ProfileModel> UpdateAsync(ProfileModel profile)
+        public async Task<ProfileModel> UpdateAsync(ProfileModel profile)
         {
-            throw new System.NotImplementedException();
+            _context.ProfileModel.Update(profile);
+            await _context.SaveChangesAsync();
+            return profile;
         }
 
-        public Task<ProfileModel> DeleteAsync(ProfileModel profile)
+        public async Task<ProfileModel[]> UpdateRangeAsync(ProfileModel[] profiles)
         {
-            throw new System.NotImplementedException();
+            _context.ProfileModel.UpdateRange(profiles);
+            await _context.SaveChangesAsync();
+            return profiles;
+        }
+
+        public async Task<ProfileModel> DeleteAsync(ProfileModel profile)
+        {
+            _context.ProfileModel.Remove(profile);
+            await _context.SaveChangesAsync();
+            return profile;
         }
     }
 }

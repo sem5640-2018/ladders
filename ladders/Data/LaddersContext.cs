@@ -19,5 +19,7 @@ namespace ladders.Models
         public DbSet<ladders.Models.LadderModel> LadderModel { get; set; }
 
         public DbSet<ladders.Models.Challenge> Challenge { get; set; }
+        
+        public DbSet<ladders.Models.Booking> Booking { get; set; }
     }
 }
