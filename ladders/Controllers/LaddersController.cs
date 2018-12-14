@@ -43,6 +43,7 @@ namespace ladders.Controllers
             var ladderModel = await _laddersRepository.GetByIdIncAllAndUserRankAsync((int) id);
 
             if (ladderModel == null) return NotFound();
+            ladderModel.CurrentRankings = ladderModel.CurrentRankings.OrderBy(l => l.Position).ToList();
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
             ViewBag.Me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
             ViewBag.challenges = _challengesRepository.GetByLadder(ladderModel);

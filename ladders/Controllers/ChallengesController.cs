@@ -326,9 +326,12 @@ namespace ladders.Controllers
                     break;
             }
 
-            var chalPos = challenge.Challengee.CurrentRanking.Position;
-            challenge.Challengee.CurrentRanking.Position = challenge.Challenger.CurrentRanking.Position;
-            challenge.Challenger.CurrentRanking.Position = chalPos;
+            if (winner == Winner.Challenger)
+            {
+                var chalPos = challenge.Challengee.CurrentRanking.Position;
+                challenge.Challengee.CurrentRanking.Position = challenge.Challenger.CurrentRanking.Position;
+                challenge.Challenger.CurrentRanking.Position = chalPos;
+            }
 
             await _challengesRepository.UpdateAsync(challenge);
             await _profileRepository.UpdateRangeAsync(new [] {challenge.Challengee, challenge.Challenger});

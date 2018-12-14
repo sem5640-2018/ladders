@@ -71,7 +71,7 @@ namespace ladders.Shared
             return result.IsSuccessStatusCode;
         }
 
-        public static bool IsUserInChallenge(IEnumerable<Challenge> model, ProfileModel user)
+        public static bool IsUserInActiveChallenge(IEnumerable<Challenge> model, ProfileModel user)
         {
             bool Check(Challenge challenge)
             {

@@ -4,39 +4,49 @@
     ViewData["Title"] = "Details";
 }
 
-<h2>Details</h2>
-
-<div>
-    <h4>ProfileModel</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.UserId)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.UserId)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Availability)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Availability)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.PreferredLocation)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.PreferredLocation)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Suspended)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Suspended)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <strong class="card-title">Profile Details</strong>
+                <a asp-action="Index">Back to List</a>
+            </div>
+            <div class="card-body">
+                <div>
+                    <h4>ProfileModel</h4>
+                    <hr />
+                    <dl class="dl-horizontal">
+                        <dt>
+                            @Html.DisplayNameFor(model => model.UserId)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.UserId)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Availability)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Availability)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.PreferredLocation)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.PreferredLocation)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Suspended)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Suspended)
+                        </dd>
+                    </dl>
+                </div>
+                <div>
+                    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+                    <a asp-action="Index">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
