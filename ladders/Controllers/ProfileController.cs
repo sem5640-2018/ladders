@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using ladders.Models;
+using ladders.Repositorys.Interfaces;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +12,13 @@ namespace ladders.Controllers
     [Authorize]
     public class ProfileController : Controller
     {
-        private readonly LaddersContext _context;
+        private readonly IProfileRepository _profileRepository;
+        private readonly ILaddersRepository _laddersRepository;
 
-        public ProfileController(LaddersContext context)
+        public ProfileController(IProfileRepository profileRepository, ILaddersRepository laddersRepository)
         {
-            _context = context;
+            _profileRepository = profileRepository;
+            _laddersRepository = laddersRepository;
         }
 
         #region User Requests
@@ -25,9 +28,10 @@ namespace ladders.Controllers
         {
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
             ViewBag.ID = Helpers.GetMyName(User);
-            ViewBag.HaveAccount = Helpers.DoIHaveAnAccount(User, _context);
+            ViewBag.HaveAccount = _profileRepository.Exists(ViewBag.ID);
+            
 
-            return View(await _context.ProfileModel.ToListAsync());
+            return View(await _profileRepository.GetAllAsync());
         }
 
         // GET: Profile/Details/5
@@ -35,8 +39,7 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
-            var profileModel = await _context.ProfileModel
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var profileModel = await _profileRepository.GetByIdAsync((int) id);
             if (profileModel == null) return NotFound();
 
             return View(profileModel);
@@ -67,8 +70,7 @@ namespace ladders.Controllers
         {
             if (!ModelState.IsValid) return View(profileModel);
 
-            await _context.AddAsync(profileModel);
-            await _context.SaveChangesAsync();
+            await _profileRepository.AddAsync(profileModel);
             return RedirectToAction(nameof(Index));
         }
 
@@ -77,7 +79,7 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
-            var profileModel = await _context.ProfileModel.FindAsync(id);
+            var profileModel = await _profileRepository.FindByIdAsync((int) id);
             if (profileModel == null) return NotFound();
 
             if (!Helpers.AmIAdmin(User) && !profileModel.UserId.Equals(Helpers.GetMyName(User))) return NotFound();
@@ -102,8 +104,7 @@ namespace ladders.Controllers
 
             try
             {
-                _context.Update(profileModel);
-                await _context.SaveChangesAsync();
+                await _profileRepository.UpdateAsync(profileModel);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -122,8 +123,7 @@ namespace ladders.Controllers
 
             if (id == null) return NotFound();
 
-            var profileModel = await _context.ProfileModel
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var profileModel = await _profileRepository.GetByIdAsync((int) id);
             if (profileModel == null) return NotFound();
 
             return View(profileModel);
@@ -137,9 +137,8 @@ namespace ladders.Controllers
         {
             if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
-            var profileModel = await _context.ProfileModel.FindAsync(id);
-            _context.ProfileModel.Remove(profileModel);
-            await _context.SaveChangesAsync();
+            var profileModel = await _profileRepository.FindByIdAsync(id);
+            await _profileRepository.DeleteAsync(profileModel);
             return RedirectToAction(nameof(Index));
         }
 
@@ -149,13 +148,13 @@ namespace ladders.Controllers
 
         private bool ProfileModelExists(int id)
         {
-            return _context.ProfileModel.Any(e => e.Id == id);
+            return _profileRepository.Exists(id);
         }
 
         private async Task<IActionResult> RedirectToMyProfile()
         {
             var userId = Helpers.GetMyName(User);
-            var account = await _context.ProfileModel.FirstOrDefaultAsync(e => e.UserId == userId);
+            var account = await _profileRepository.GetByUserIdAsync(userId);
             return account == null
                 ? RedirectToAction("Index", "Ladders")
                 : RedirectToAction("Details", new {id = account.Id});

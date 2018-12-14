@@ -8,6 +8,10 @@ namespace ladders.Repositorys.Interfaces
     {
         Task<ProfileModel> FindByIdAsync(int id);
         
+        Task<ProfileModel> GetByIdAsync(int id);
+        
+        Task<ProfileModel> GetByUserIdAsync(string userId);
+        
         Task<ProfileModel> GetByNameIncAsync(string name);
         
         Task<List<ProfileModel>> GetAllAsync();
@@ -19,5 +23,9 @@ namespace ladders.Repositorys.Interfaces
         Task<ProfileModel[]> UpdateRangeAsync(ProfileModel[] profiles);
 
         Task<ProfileModel> DeleteAsync(ProfileModel profile);
+
+        bool Exists(int id);
+
+        bool Exists(string userId);
     }
 }
