@@ -4,6 +4,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Hangfire;
+using Hangfire.MySql;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -15,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using ladders.Models;
 using ladders.Repositories;
 using ladders.Repositories.Interfaces;
+using ladders.Services;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -82,8 +85,6 @@ namespace ladders
                     options.ApiName = _appConfig.GetValue<string>("ApiResourceName");
                 });
 
-
-
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("Administrator", pb => pb.RequireClaim("user_type", "administrator"));
@@ -97,10 +98,14 @@ namespace ladders
                 options.Conventions.AddPageRoute("/Ladders/Index", "");
             });
 
+            var connectionString = Configuration.GetConnectionString("LaddersContext");
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddDbContext<LaddersContext>(options =>
-                    options.UseMySql(Configuration.GetConnectionString("LaddersContext")));
+                    options.UseMySql(connectionString));
+            
+            services.AddHangfire(x => x.UseStorage(new MySqlStorage(connectionString, new MySqlStorageOptions())));
             
             if (!_environment.IsDevelopment())
             {
@@ -114,7 +119,6 @@ namespace ladders
                     }
                 });
             }
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -122,6 +126,7 @@ namespace ladders
         {
             if (env.IsDevelopment())
             {
+                app.UseHangfireDashboard();
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
             }
@@ -143,17 +148,20 @@ namespace ladders
                 app.UseHsts();
             }
 
+            app.UseHangfireServer();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseAuthentication();
-
+          
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Ladders}/{action=Index}/{id?}");
             });
+
+            RecurringJob.AddOrUpdate<EmailManager>(es => es.SendScheduledEmails(), Cron.Weekly);
         }
         
         private void RunMigrations(IApplicationBuilder app)

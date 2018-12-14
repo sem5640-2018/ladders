@@ -64,6 +64,13 @@ namespace ladders.Repositories
             return await _context.LadderModel.ToListAsync();
         }
 
+        public async Task<List<LadderModel>> GetAllAsyncIncludes()
+        {
+            return await _context.LadderModel.Include(l => l.CurrentRankings)
+                .ThenInclude(r => r.User)
+                .ToListAsync();
+        }
+
         public async Task<LadderModel> AddAsync(LadderModel ladder)
         {
             _context.LadderModel.Add(ladder);
