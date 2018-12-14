@@ -15,7 +15,9 @@ namespace ladders.Repositories.Interfaces
         Task<LadderModel> GetByIdIncAllAndUserRankAsync(int id);
         
         Task<LadderModel> GetByIdIncApprovedAsync(int id);
-        
+
+        Task<List<Ranking>> GetRankingsByLadderId(int id);
+
         Task<List<LadderModel>> GetAllAsync();
 
         Task<LadderModel> AddAsync(LadderModel ladder);
