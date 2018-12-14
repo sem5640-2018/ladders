@@ -187,7 +187,7 @@ namespace ladders.Repositories
                 return challenge.ChallengedTime < now.AddDays(-7);
             }
 
-            return challenge.Created < now.AddDays(-3) && challenge.ChallengedTime > now;
+            return challenge.Created < now.AddDays(-3) || challenge.ChallengedTime < now;
         }
     }
 }
