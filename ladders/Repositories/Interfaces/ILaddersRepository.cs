@@ -30,6 +30,8 @@ namespace ladders.Repositories.Interfaces
 
         Task<LadderModel> UpdateLadder(Challenge challenge);
 
+        Task<List<LadderModel>> GetAllAsyncIncludes();
+
         bool Exists(int id);
     }
 }
