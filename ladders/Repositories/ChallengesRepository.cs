@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ladders.Models;
 using ladders.Repositories.Interfaces;
+using ladders.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace ladders.Repositories
@@ -10,17 +12,17 @@ namespace ladders.Repositories
     public class ChallengesRepository : IChallengesRepository
     {
         private readonly LaddersContext _context;
-        
+
         public ChallengesRepository(LaddersContext context)
         {
             _context = context;
         }
-        
+
         public async Task<Challenge> FindByIdAsync(int id)
         {
             return await _context.Challenge.FindAsync(id);
         }
-        
+
         public async Task<Challenge> GetFullChallenge(int id)
         {
             return await _context
@@ -103,7 +105,11 @@ namespace ladders.Repositories
 
         public bool IsUserInActiveChallenge(ProfileModel user)
         {
-            
+            return GetActiveUserChallenge(user) != null;
+        }
+
+        public Challenge GetActiveUserChallenge(ProfileModel user)
+        {
             bool Check(Challenge challenge)
             {
                 if (challenge.ChallengeeId != user.Id && challenge.ChallengerId != user.Id)
@@ -112,7 +118,34 @@ namespace ladders.Repositories
                 return challenge.Resolved;
             }
 
-            return _context.Challenge.Where(Check).Any();
+            return _context.Challenge.FirstOrDefault(Check);
+        }
+
+        public async Task<Challenge> UserConcedeChallenge(ProfileModel user, IApiClient apiClient, string bookingUri,
+            Challenge challenge)
+        {
+            var isChallenger = challenge.Challenger == user;
+            var winner = isChallenger ? Winner.Challengee : Winner.Challenger;
+
+            return await UpdateWinner(winner, apiClient, bookingUri, challenge);
+        }
+
+        public async Task<Challenge> UpdateWinner(Winner winner, IApiClient apiClient, string bookingUri,
+            Challenge challenge)
+        {
+            if (challenge.ChallengedTime < DateTime.UtcNow)
+            {
+                await Helpers.FreeUpVenue(bookingUri, apiClient, challenge.Booking.bookingId);
+            }
+
+            challenge.Result = winner;
+            challenge.Resolved = true;
+            challenge.Accepted = true;
+
+            _context.Challenge.Update(challenge);
+            await _context.SaveChangesAsync();
+
+            return challenge;
         }
     }
 }

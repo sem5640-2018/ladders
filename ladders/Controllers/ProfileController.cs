@@ -6,19 +6,28 @@ using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace ladders.Controllers
 {
     [Authorize]
     public class ProfileController : Controller
     {
+        private readonly IApiClient _apiClient;
+        private readonly IConfigurationSection _appConfig;
         private readonly IProfileRepository _profileRepository;
         private readonly ILaddersRepository _laddersRepository;
+        private readonly IChallengesRepository _challengesRepository;
 
-        public ProfileController(IProfileRepository profileRepository, ILaddersRepository laddersRepository)
+        public ProfileController(IApiClient client, IConfiguration config, 
+            IProfileRepository profileRepository, ILaddersRepository laddersRepository,
+            IChallengesRepository challengesRepository)
         {
+            _apiClient = client;
+            _appConfig = config.GetSection("ladders");
             _profileRepository = profileRepository;
             _laddersRepository = laddersRepository;
+            _challengesRepository = challengesRepository;
         }
 
         #region User Requests
@@ -101,6 +110,12 @@ namespace ladders.Controllers
             if (!ModelState.IsValid) return View(profileModel);
 
             if (!Helpers.AmIAdmin(User) && !profileModel.UserId.Equals(Helpers.GetMyName(User))) return NotFound();
+
+            var activeChallenge = _challengesRepository.GetActiveUserChallenge(profileModel);
+            if (activeChallenge != null)
+            {
+                await _challengesRepository.UserConcedeChallenge(profileModel,_apiClient, _appConfig.GetValue<string>("BookingFacilitiesUrl"), activeChallenge);
+            }
 
             try
             {

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ladders.Models;
+using ladders.Shared;
 
 namespace ladders.Repositories.Interfaces
 {
@@ -31,5 +32,11 @@ namespace ladders.Repositories.Interfaces
         bool Exists(int id);
 
         bool IsUserInActiveChallenge(ProfileModel user);
+
+        Challenge GetActiveUserChallenge(ProfileModel user);
+
+        Task<Challenge> UserConcedeChallenge(ProfileModel user,IApiClient apiClient, string bookingUri, Challenge challenge);
+
+        Task<Challenge> UpdateWinner(Winner winner, IApiClient apiClient, string bookingUri, Challenge challenge)
     }
 }

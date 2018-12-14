@@ -256,7 +256,10 @@ namespace ladders.Controllers
                 return NotFound();
 
             await Helpers.FreeUpVenue(_appConfig.GetValue<string>("BookingFacilitiesUrl"), _apiClient, challenge.Booking.bookingId);
-            await ChallengeResolved(challenge, Winner.Challenger);
+
+            challenge = await _challengesRepository.UserConcedeChallenge(me, _apiClient,
+                _appConfig.GetValue<string>("BookingFacilitiesUrl"), challenge);
+            await _laddersRepository.UpdateLadder(challenge);
 
             return RedirectToAction(nameof(Details), new {id});
         }
@@ -274,7 +277,9 @@ namespace ladders.Controllers
             if (me == null || challenge.Challengee != me && challenge.Challenger != me)
                 return NotFound();
 
-            await ChallengeResolved(challenge, challenge.Challengee == me ? Winner.Challenger : Winner.Challengee);
+            challenge = await _challengesRepository.UserConcedeChallenge(me, _apiClient,
+                _appConfig.GetValue<string>("BookingFacilitiesUrl"), challenge);
+            await _laddersRepository.UpdateLadder(challenge);
 
             return RedirectToAction(nameof(Details), new {id});
         }
@@ -302,41 +307,6 @@ namespace ladders.Controllers
             var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
             var isAdmin = Helpers.AmIAdmin(User);
             return challenge.Challenger == me || challenge.Challengee == me || !isAdmin;
-        }
-
-        public async Task<bool> ChallengeResolved(Challenge challenge, Winner winner)
-        {
-            challenge.Accepted = true;
-            challenge.Resolved = true;
-            challenge.Result = winner;
-
-            switch (winner)
-            {
-                case Winner.Challenger:
-                    challenge.Challengee.CurrentRanking.Losses++;
-                    challenge.Challenger.CurrentRanking.Wins++;
-                    break;
-                case Winner.Draw:
-                    challenge.Challengee.CurrentRanking.Draws++;
-                    challenge.Challenger.CurrentRanking.Draws++;
-                    break;
-                case Winner.Challengee:
-                    challenge.Challengee.CurrentRanking.Wins++;
-                    challenge.Challenger.CurrentRanking.Losses++;
-                    break;
-            }
-
-            if (winner == Winner.Challenger)
-            {
-                var chalPos = challenge.Challengee.CurrentRanking.Position;
-                challenge.Challengee.CurrentRanking.Position = challenge.Challenger.CurrentRanking.Position;
-                challenge.Challenger.CurrentRanking.Position = chalPos;
-            }
-
-            await _challengesRepository.UpdateAsync(challenge);
-            await _profileRepository.UpdateRangeAsync(new [] {challenge.Challengee, challenge.Challenger});
-
-            return true;
         }
     }
 }
