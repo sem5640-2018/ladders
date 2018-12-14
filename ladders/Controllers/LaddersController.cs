@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using ladders.Models;
-using ladders.Repositorys.Interfaces;
+using ladders.Repositories.Interfaces;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

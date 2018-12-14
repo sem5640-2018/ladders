@@ -2,12 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ladders.Models;
-using ladders.Repositorys.Interfaces;
-using Microsoft.AspNetCore.Internal;
+using ladders.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 
-namespace ladders.Repositorys
+namespace ladders.Repositories
 {
     public class ChallengesRepository : IChallengesRepository
     {

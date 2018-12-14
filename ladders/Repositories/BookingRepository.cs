@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ladders.Models;
-using ladders.Repositorys.Interfaces;
+using ladders.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace ladders.Repositorys
+namespace ladders.Repositories
 {
     public class BookingRepository : IBookingRepository
     {
