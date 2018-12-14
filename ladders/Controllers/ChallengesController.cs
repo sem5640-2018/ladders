@@ -77,8 +77,8 @@ namespace ladders.Controllers
 
             if (challengee == null || ladder == null || me == null) return NotFound();
 
-            if (Helpers.IsUserInChallenge(_context.Challenge, me) ||
-                Helpers.IsUserInChallenge(_context.Challenge, challengee))
+            if (Helpers.IsUserInActiveChallenge(_context.Challenge, me) ||
+                Helpers.IsUserInActiveChallenge(_context.Challenge, challengee))
                 return NotFound();
 
             var challenge = new Challenge
@@ -118,8 +118,8 @@ namespace ladders.Controllers
 
             var user = await Helpers.GetMe(User, _context);
 
-            if (Helpers.IsUserInChallenge(_context.Challenge, user) ||
-                Helpers.IsUserInChallenge(_context.Challenge, challenge.Challengee))
+            if (Helpers.IsUserInActiveChallenge(_context.Challenge, user) ||
+                Helpers.IsUserInActiveChallenge(_context.Challenge, challenge.Challengee))
                 return NotFound();
 
             challenge.Challenger = null;
@@ -348,9 +348,12 @@ namespace ladders.Controllers
                     break;
             }
 
-            var chalPos = challenge.Challengee.CurrentRanking.Position;
-            challenge.Challengee.CurrentRanking.Position = challenge.Challenger.CurrentRanking.Position;
-            challenge.Challenger.CurrentRanking.Position = chalPos;
+            if (winner == Winner.Challenger)
+            {
+                var chalPos = challenge.Challengee.CurrentRanking.Position;
+                challenge.Challengee.CurrentRanking.Position = challenge.Challenger.CurrentRanking.Position;
+                challenge.Challenger.CurrentRanking.Position = chalPos;
+            }
 
             _context.Challenge.Update(challenge);
             _context.ProfileModel.Update(challenge.Challengee);
