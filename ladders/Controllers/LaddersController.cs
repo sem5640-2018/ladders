@@ -327,13 +327,6 @@ namespace ladders.Controllers
 
         #region Help Functions
 
-        private async Task<bool> AmIMember(LadderModel ladder) //TODO is it needed (remove comment if it is)
-        {
-            ProfileModel user = await _profileRepository.GetByUserIdAsync(Helpers.GetMyName(User));
-            return IsMember(user, ladder);
-        }
-
-
         private static bool IsMember(ProfileModel user, LadderModel ladder)
         {
             return ladder.CurrentRankings?.FirstOrDefault(a => a.User == user) != null;

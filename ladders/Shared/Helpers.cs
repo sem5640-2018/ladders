@@ -87,12 +87,12 @@ namespace ladders.Shared
         
             var enumerable = usersAbove.ToList();
             var added = 0;
-            for (var i = 1; i <= enumerable.Count(); i++)
+            for (var i = 1; i <= enumerable.Count; i++)
             {
                 if (added == 5) return users;
 
                 var i1 = i;
-                var user = enumerable?.Where(a => a.Position == rank.Position - i1 && a.User != null && !a.User.Suspended)?.FirstOrDefault();
+                var user = enumerable.FirstOrDefault(a => a.Position == rank.Position - i1 && a.User != null && !a.User.Suspended);
 
                 if (user?.User == null)
                     continue;
