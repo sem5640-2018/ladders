@@ -4,34 +4,39 @@
     ViewData["Title"] = "Approval";
 }
 
-<h2>Approval</h2>
-
-@foreach (var item in Model.ApprovalUsersList)
-{
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Name)
-        </td>
-        <td>
-            Accept this user?
-            <form asp-action="Approval">
-                <input type="hidden" value="true" id="add" name="add"/>
-                <input type="hidden" value="@(item.UserId)" id="userId" name="userId"/>
-                <input type="hidden" value="@(Model.Id)" id="id" name="id"/>
-                <div class="form-group">
-                    <input type="submit" value="Accept" class="btn btn-default" title="Accept"/>
-                </div>
-            </form>
-        </td>
-        <td>
-            <form asp-action="Approval">
-                <input type="hidden" value="false" id="add" name="add"/>
-                <input type="hidden" value="@(item.UserId)" id="userId" name="userId"/>
-                <input type="hidden" value="@(Model.Id)" id="id" name="id"/>
-                <div class="form-group">
-                    <input type="submit" value="Reject" class="btn btn-default" title="Accept"/>
-                </div>
-            </form>
-        </td>
-    </tr>
-}
+<div class="card">
+    <div class="card-header">
+        <strong class="card-title">Ladder Approval</strong>
+    </div>
+    <div class="card-body">
+        @foreach (var item in Model.ApprovalUsersList)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    Accept this user?
+                    <form asp-action="Approval">
+                        <input type="hidden" value="true" id="add" name="add"/>
+                        <input type="hidden" value="@(item.UserId)" id="userId" name="userId"/>
+                        <input type="hidden" value="@(Model.Id)" id="id" name="id"/>
+                        <div class="form-group">
+                            <input type="submit" value="Accept" class="btn btn-default" title="Accept"/>
+                        </div>
+                    </form>
+                </td>
+                <td>
+                    <form asp-action="Approval">
+                        <input type="hidden" value="false" id="add" name="add"/>
+                        <input type="hidden" value="@(item.UserId)" id="userId" name="userId"/>
+                        <input type="hidden" value="@(Model.Id)" id="id" name="id"/>
+                        <div class="form-group">
+                            <input type="submit" value="Reject" class="btn btn-default" title="Accept"/>
+                        </div>
+                    </form>
+                </td>
+            </tr>
+        }
+    </div>
+</div>
