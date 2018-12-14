@@ -9,7 +9,6 @@
         <div class="card">
             <div class="card-header">
                 <strong class="card-title">Edit Profile</strong>
-                <a asp-action="Index">Back to List</a>
             </div>
             <div class="card-body">
                 <h4>ProfileModel</h4>
@@ -20,7 +19,7 @@
                             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                             <input type="hidden" asp-for="Id" />
                             <input asp-for="UserId" type="hidden" />
-                            <input asp-for="Name" type="hidden" />/>
+                            <input asp-for="Name" type="hidden" />
                             <input asp-for="CurrentRankingId" type="hidden" />
                             <input asp-for="ApprovalLadderId" type="hidden"/>
 
@@ -42,7 +41,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <input type="submit" value="Save" class="btn btn-default" />
+                                <input type="submit" value="Save" class="btn btn-primary" />
                             </div>
                         </form>
                     </div>
