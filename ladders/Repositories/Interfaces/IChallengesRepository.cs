@@ -42,5 +42,7 @@ namespace ladders.Repositories.Interfaces
         Task<Challenge> UserConcedeChallenge(ProfileModel user,IApiClient apiClient, string bookingUri, Challenge challenge);
 
         Task<Challenge> UpdateWinner(Winner winner, IApiClient apiClient, string bookingUri, Challenge challenge);
+
+        bool IsChallengeStale(Challenge challenge);
     }
 }
