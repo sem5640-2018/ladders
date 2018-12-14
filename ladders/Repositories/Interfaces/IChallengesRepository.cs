@@ -21,6 +21,8 @@ namespace ladders.Repositories.Interfaces
         
         List<Challenge> GetByLadder(LadderModel ladder);
 
+        List<Challenge> GetByLadderActive(LadderModel ladder);
+
         List<Challenge> GetOutstanding(int userId);
 
         List<Challenge> GetResolved(int userId);

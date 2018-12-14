@@ -62,6 +62,7 @@ namespace ladders.Controllers
             ViewBag.Me = me;
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
             ViewBag.challenges = _challengesRepository.GetByLadder(ladderModel);
+            ViewBag.ActiveChallenges = _challengesRepository.GetByLadderActive(ladderModel);
 
             return View(ladderModel);
         }

@@ -72,6 +72,14 @@ namespace ladders.Repositories
             return _context.Challenge.Where(a => a.Ladder == ladder).ToList();
         }
 
+        public List<Challenge> GetByLadderActive(LadderModel ladder)
+        {
+            return _context.Challenge
+                .Include(c => c.Challenger)
+                .Include(c => c.Challengee)
+                .Where(a => a.Ladder == ladder && !a.Resolved).ToList();
+        }
+
         public List<Challenge> GetOutstanding(int userId)
         {
             return _context.Challenge
