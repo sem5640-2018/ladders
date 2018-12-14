@@ -40,6 +40,7 @@ namespace ladders.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (ladderModel == null) return NotFound();
+            ladderModel.CurrentRankings = ladderModel.CurrentRankings.OrderBy(l => l.Position).ToList();
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
             ViewBag.Me = await Helpers.GetMe(User, _context);
             ViewBag.challenges = _context.Challenge.Where(a => a.Ladder == ladderModel);
