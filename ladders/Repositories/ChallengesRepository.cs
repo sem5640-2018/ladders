@@ -70,6 +70,23 @@ namespace ladders.Repositories
             return _context.Challenge.Where(a => a.Ladder == ladder).ToList();
         }
 
+        public List<Challenge> GetOutstanding(int userId)
+        {
+            return _context.Challenge
+                .Where(a => !a.Resolved)
+                .Where(a => a.ChallengeeId == userId || a.ChallengerId == userId)
+                .ToList();
+        }
+        
+        public List<Challenge> GetResolved(int userId)
+        {
+            return _context.Challenge
+                .Where(a => a.Resolved)
+                .Where(a => a.ChallengeeId == userId || a.ChallengerId == userId)
+                .OrderByDescending(a => a.ChallengedTime)
+                .ToList();
+        }
+
         public async Task<List<Challenge>> GetAllAsync()
         {
             return await _context.Challenge.ToListAsync();
