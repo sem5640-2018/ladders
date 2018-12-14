@@ -135,7 +135,7 @@ namespace ladders.Repositories
                 return challenge.Resolved;
             }
 
-            return _context.Challenge.FirstOrDefault(Check);
+            return _context.Challenge.Include(a => a.Ladder).FirstOrDefault(Check);
         }
 
         public async Task<Challenge> UserConcedeChallenge(ProfileModel user, IApiClient apiClient, string bookingUri,
