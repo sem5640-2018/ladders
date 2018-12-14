@@ -139,7 +139,7 @@ namespace ladders.Controllers
 
             await Helpers.EmailUser(_appConfig.GetValue<string>("CommsUrl"), _apiClient, user.UserId, "Test", "email");
 
-            _challengesRepository.AddAsync(challenge);
+            await _challengesRepository.AddAsync(challenge);
             return RedirectToAction(nameof(Details), new {challenge.Id});
         }
 
