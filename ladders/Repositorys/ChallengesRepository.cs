@@ -103,9 +103,18 @@ namespace ladders.Repositorys
             return _context.Challenge.Any(c => c.Id == id);
         }
 
-        public bool IsUserInChallenge(ProfileModel user)
+        public bool IsUserInActiveChallenge(ProfileModel user)
         {
-            return _context.Challenge.Any(c => c.ChallengeeId == user.Id || c.ChallengerId == user.Id);
+            
+            bool Check(Challenge challenge)
+            {
+                if (challenge.ChallengeeId != user.Id && challenge.ChallengerId != user.Id)
+                    return false;
+
+                return challenge.Resolved;
+            }
+
+            return _context.Challenge.Where(Check).Any();
         }
     }
 }

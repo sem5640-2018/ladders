@@ -31,6 +31,6 @@ namespace ladders.Repositorys.Interfaces
 
         bool Exists(int id);
 
-        bool IsUserInChallenge(ProfileModel user);
+        bool IsUserInActiveChallenge(ProfileModel user);
     }
 }
