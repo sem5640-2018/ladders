@@ -90,5 +90,33 @@ namespace ladders.Shared
 
             return challenge.Resolved;
         }
+
+        public static Dictionary<string, bool> GetChallengable(IEnumerable<Challenge> challenges, LadderModel ladder, Ranking rank)
+        {
+            var users = new Dictionary<string, bool>();
+            var allChallenges = challenges.Where(a => a.Ladder == ladder).ToList();
+
+            var usersAbove = ladder.CurrentRankings.Where(a => a.Position < rank.Position);
+        
+            var enumerable = usersAbove.ToList();
+            var added = 0;
+            for (var i = 1; i < enumerable.Count(); i++)
+            {
+                if (added == 5) return users;
+
+                var i1 = i;
+                var user = enumerable?.Where(a => a.Position == rank.Position - i1)?.FirstOrDefault();
+
+                if (user == null)
+                    continue;
+
+                if (IsUserInActiveChallenge(allChallenges, user.User)) continue;
+
+                users[user.User.Name] = true;
+                added++;
+            }
+
+            return users;
+        }
     }
 }
