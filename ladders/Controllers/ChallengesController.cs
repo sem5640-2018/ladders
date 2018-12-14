@@ -137,7 +137,7 @@ namespace ladders.Controllers
             await _bookingRepository.AddAsync(booking);
             challenge.Booking = booking;
 
-            await Helpers.EmailUser(_appConfig.GetValue<string>("CommsUrl"), _apiClient, user.UserId, "Test", "email");
+            await Helpers.ChallengeNotifier(_appConfig.GetValue<string>("CommsUrl"), _apiClient, "Challenge Creation Notification", challenge);
 
             await _challengesRepository.AddAsync(challenge);
             return RedirectToAction(nameof(Details), new {challenge.Id});

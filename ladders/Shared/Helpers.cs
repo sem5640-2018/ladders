@@ -37,6 +37,38 @@ namespace ladders.Shared
             return result.IsSuccessStatusCode;
         }
 
+        public static async Task<bool> ChallengeNotifier(string commsBaseUrl, IApiClient client, string Subject, Challenge challenge)
+        {
+            var ce = await EmailUser(commsBaseUrl, client, challenge.Challengee.UserId, Subject,
+                GenerateChallengeeEmailContent(challenge));
+            
+            var cr = await EmailUser(commsBaseUrl, client, challenge.Challenger.UserId, Subject,
+                GenerateChallengerEmailContent(challenge));
+
+            if (!cr || !ce)
+            {
+                Console.WriteLine($"Error Sending email Challengee:{ce} Challenger:{cr}");
+                return false;
+            }
+            return true;
+        }
+
+        private static string GenerateChallengerEmailContent(Challenge challenge)
+        {
+            return $"You have Challenged {challenge.Challengee.Name}: \n" +
+                   $"Venue: {challenge.Booking.facility.venue} \n" +
+                   $"Sport: {challenge.Booking.facility.sport} \n" +
+                   $"Date: {challenge.ChallengedTime.Date} Time:{challenge.ChallengedTime.TimeOfDay}";
+        }
+        
+        private static string GenerateChallengeeEmailContent(Challenge challenge)
+        {
+            return $"{challenge.Challenger.Name} has Challenged you: \n" +
+                   $"Venue: {challenge.Booking.facility.venue} \n" +
+                   $"Sport: {challenge.Booking.facility.sport} \n" +
+                   $"Date: {challenge.ChallengedTime.Date} Time:{challenge.ChallengedTime.TimeOfDay}";
+        }
+
         public static async Task<IEnumerable<Venue>> GetVenues(string bookingBaseUrl, IApiClient apiClient)
         {
             var venueData = await apiClient.GetAsync($"{bookingBaseUrl}api/sports");
