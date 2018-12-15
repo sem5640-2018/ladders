@@ -1,0 +1,53 @@
+﻿@model IEnumerable<LadderModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="card">
+    <div class="card-header">
+        <strong class="card-title"><h2>Ladders</h2></strong>
+        @if (ViewBag.IsAdmin)
+        {
+            <p>
+                <a class="btn btn-default" asp-action="Create">Create New</a>
+            </p>
+        }
+    </div>
+    <div class="table-stats order-table ov-h">
+        <table class="table table-striped table-hover table-bordered" >
+            <thead>
+            <tr>
+                <th>Ladder Name</th>
+                <th>Ladder Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr onclick="@("window.location.href='" + @Url.Action("Details","LaddersMan", new{id =item.Id}) + "'")">
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+
+                        @if (ViewBag.User?.CurrentRanking?.LadderModel != item)
+                        {
+                            <span>
+                                <a asp-action="Join" asp-route-id="@item.Id">Join</a>
+                            </span>
+                        }
+                        @if (ViewBag.IsAdmin)
+                        {
+                            <span>
+                                | <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                                <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                            </span>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

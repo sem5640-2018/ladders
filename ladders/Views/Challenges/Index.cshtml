@@ -1,0 +1,115 @@
+﻿@using Humanizer
+@model IEnumerable<Challenge>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="card">
+    <div class="card-header">
+        <strong class="card-title"><h2>Outstanding Challenges</h2></strong>
+    </div>
+    <div class="table-stats order-table ov-h">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>
+                    Challenged
+                </th>
+                <th>
+                    Challenge Date
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Resolved)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Result)
+                </th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (Challenge item in ViewBag.Challenged) {
+                <tr>
+                    <td>
+                        @(item.Created.Humanize().Transform(To.SentenceCase))
+                    </td>
+                    <td>
+                        @(item.ChallengedTime.Humanize().Transform(To.SentenceCase))
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Resolved)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Result)
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id">View</a>
+                        @if (ViewBag.IsAdmin)
+                        {
+                            <span>
+                                | <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                            </span>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">
+        <strong class="card-title"><h2>Sent Challenges</h2></strong>
+    </div>
+    <div class="table-stats order-table ov-h">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>
+                    Challenged
+                </th>
+                <th>
+                    Challenge Date
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Resolved)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Result)
+                </th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (Challenge item in ViewBag.Challenging) {
+                <tr>
+                    <td>
+                        @(item.Created.Humanize().Transform(To.SentenceCase))
+                    </td>
+                    <td>
+                        @(item.ChallengedTime.Humanize().Transform(To.SentenceCase))
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Resolved)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Result)
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id">View</a>
+                        @if (ViewBag.IsAdmin)
+                        {
+                            <span>
+                                | <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                            </span>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
