@@ -1,4 +1,5 @@
-﻿@model ProfileModel
+﻿@using Humanizer
+@model ProfileModel
 
 @{
     ViewData["Title"] = "Details";
@@ -9,7 +10,7 @@
         <div class="card">
             <div class="card-header">
                 <strong class="card-title">Profile Details</strong>
-                <a asp-action="Index">Back to List</a>
+                <a class="btn btn-default" asp-action="Index">Back to List</a>
             </div>
             <div class="card-body">
                 <div>
@@ -43,8 +44,7 @@
                     </dl>
                 </div>
                 <div>
-                    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-                    <a asp-action="Index">Back to List</a>
+                    <a class="btn btn-default" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
                 </div>
             </div>
         </div>
@@ -109,14 +109,14 @@
                                 <tr>
                                     @if (challenge.Challengee == Model)
                                     {
-                                        <td>@Html.DisplayFor(modelItem => challenge.Challenger) Challenged You</td>
+                                        <td>@Html.DisplayFor(modelItem => challenge.Challenger.Name) Challenged You</td>
                                     }
                                     else if (challenge.Challenger == Model)
                                     {
-                                        <td>You Challenged @Html.DisplayFor(modelItem => challenge.Challengee)</td>
+                                        <td>You Challenged @Html.DisplayFor(modelItem => challenge.Challengee.Name)</td>
                                     }
                                     
-                                    <td>@Html.DisplayFor(modelItem => challenge.ChallengedTime)</td>
+                                    <td>@(challenge.ChallengedTime.Humanize())</td>
                                     <td>@Html.DisplayFor(modelItem => challenge.Accepted)</td>
                                 </tr>
                             }

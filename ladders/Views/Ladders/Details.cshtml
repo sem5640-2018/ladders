@@ -33,8 +33,9 @@
                             <tr>
                                 <th>Challenger</th>
                                 <th>Challenging</th>
-                                <th>Challenged on</th>
+                                <th>Challenged</th>
                                 <th>Event Time</th>
+                                <th>Responded</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -54,6 +55,9 @@
                                         </td>
                                         <td>
                                             @(item.ChallengedTime.Humanize())
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Accepted)
                                         </td>
                                     </tr>
                                 }
