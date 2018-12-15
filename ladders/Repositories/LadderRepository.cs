@@ -121,6 +121,7 @@ namespace ladders.Repositories
                     break;
             }
 
+            _context.Ranking.UpdateRange(ladderModel.CurrentRankings);
             await _context.SaveChangesAsync();
 
             return ladderModel;
