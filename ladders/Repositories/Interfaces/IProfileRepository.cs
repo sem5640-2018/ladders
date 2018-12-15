@@ -11,7 +11,9 @@ namespace ladders.Repositories.Interfaces
         Task<ProfileModel> GetByIdAsync(int id);
         
         Task<ProfileModel> GetByUserIdAsync(string userId);
-        
+
+        Task<ProfileModel> GetByUserIdAsync(int id);
+
         Task<ProfileModel> GetByUserIdIncAsync(string name);
         
         Task<List<ProfileModel>> GetAllAsync();

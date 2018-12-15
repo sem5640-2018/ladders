@@ -33,6 +33,12 @@ namespace ladders.Repositories
                 .FirstOrDefaultAsync(m => m.UserId == userId);
         }
 
+        public async Task<ProfileModel> GetByUserIdAsync(int id)
+        {
+            return await _context.ProfileModel.Include(a => a.CurrentRanking).ThenInclude(lad => lad.LadderModel)
+                .FirstOrDefaultAsync(e => e.Id == id);
+        }
+
         public async Task<ProfileModel> GetByUserIdIncAsync(string name)
         {
             return await _context.ProfileModel.Include(a => a.CurrentRanking).ThenInclude(lad => lad.LadderModel).FirstOrDefaultAsync(e => e.UserId == name);

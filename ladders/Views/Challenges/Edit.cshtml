@@ -1,4 +1,4 @@
-﻿@model ladders.Models.Challenge
+﻿@model Challenge
 
 @{
     ViewData["Title"] = "Edit";
@@ -24,12 +24,12 @@
 
                     <div class="form-group">
                         <label>Venue</label>
-                        @Html.DropDownList("VenueId", (IEnumerable<SelectListItem>) ViewBag.VenueId, new {@id = "venueDDL", @value = "Facility.sport.sportId", @class = "form-control", @onchange = "updateSports(); getTimes()"})
+                        @Html.DropDownList("VenueId", (IEnumerable<SelectListItem>) ViewBag.VenueId, new {id = "venueDDL", value = "Facility.sport.sportId", @class = "form-control", onchange = "updateSports(); getTimes()"})
                     </div>
 
                     <div class="form-group">
                         <label>Sport</label>
-                        @Html.DropDownList("SportId", (IEnumerable<SelectListItem>) ViewBag.SportId, new {@id = "sportDDL", @class = "form-control", @onchange = "getTimes()"})
+                        @Html.DropDownList("SportId", (IEnumerable<SelectListItem>) ViewBag.SportId, new {id = "sportDDL", @class = "form-control", onchange = "getTimes()"})
                     </div>
 
                     <div class="form-group">
