@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ladders.Models;
 
 namespace ladders.Migrations
 {
     [DbContext(typeof(LaddersContext))]
-    partial class LaddersContextModelSnapshot : ModelSnapshot
+    [Migration("20181215160517_Store-Internal-Booking-id")]
+    partial class StoreInternalBookingid
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,7 +28,7 @@ namespace ladders.Migrations
 
                     b.Property<int>("bookingId");
 
-                    b.Property<int>("facilityId");
+                    b.Property<int?>("facilityId");
 
                     b.Property<string>("userId");
 
@@ -195,8 +197,7 @@ namespace ladders.Migrations
                 {
                     b.HasOne("ladders.Models.Facility", "facility")
                         .WithMany()
-                        .HasForeignKey("facilityId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("facilityId");
                 });
 
             modelBuilder.Entity("ladders.Models.Challenge", b =>

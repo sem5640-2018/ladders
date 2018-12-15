@@ -91,7 +91,8 @@ namespace ladders.Controllers
                 Resolved = false,
                 Challenger = me,
                 Challengee = challengee,
-                Ladder = ladder
+                Ladder = ladder,
+                Result = Winner.Unresolved
             };
 
             var facilities = await Helpers.GetVenues(_appConfig.GetValue<string>("BookingFacilitiesUrl"), _apiClient);
@@ -231,7 +232,7 @@ namespace ladders.Controllers
             return RedirectToAction(nameof(Details), new {id});
         }
 
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> Concede(int id)
         {
             var challenge = await _challengesRepository.FindByIdAsync(id);
@@ -245,7 +246,7 @@ namespace ladders.Controllers
             return View(challenge);
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> ConcedeConfirm(int id)
         {
             var challenge = await _challengesRepository.GetFullChallenge(id);

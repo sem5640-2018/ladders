@@ -104,7 +104,7 @@ namespace ladders.Repositories
 
         public async Task<Challenge> AddAsync(Challenge challenge)
         {
-            _context.Challenge.Add(challenge);
+            await _context.Challenge.AddAsync(challenge);
             await _context.SaveChangesAsync();
             return challenge;
         }
