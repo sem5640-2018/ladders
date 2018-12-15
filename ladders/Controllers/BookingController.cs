@@ -32,13 +32,13 @@ namespace ladders.Controllers
 
             if (!timeData.IsSuccessStatusCode)
             {
-                return (NoContent());
+                return NoContent();
             }
 
             var info = await timeData.Content.ReadAsStringAsync();
             var sports = JsonConvert.DeserializeObject<ICollection<DateTime>>(info);
 
-            return (Ok(sports));
+            return Ok(sports);
         }
 
         [HttpGet("getSportsByVenue/{id}")]
@@ -49,13 +49,13 @@ namespace ladders.Controllers
                     $"{_appConfig.GetValue<string>("BookingFacilitiesUrl")}api/sports/getSportsByVenue/{id}");
             if (!sportsData.IsSuccessStatusCode)
             {
-                return (NoContent());
+                return NoContent();
             }
 
             var info = await sportsData.Content.ReadAsStringAsync();
             var sports = JsonConvert.DeserializeObject<ICollection<Sport>>(info);
 
-            return (Ok(sports));
+            return Ok(sports);
         }
     }
 }

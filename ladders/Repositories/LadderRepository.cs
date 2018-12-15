@@ -55,8 +55,9 @@ namespace ladders.Repositories
         {
             var ladder = await _context.LadderModel
                 .Include(m => m.CurrentRankings)
+                .ThenInclude(rank => rank.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            return ladder.CurrentRankings.ToList();
+            return ladder.CurrentRankings.OrderBy(rank => rank.Position).ToList();
         }
 
         public async Task<List<LadderModel>> GetAllAsync()

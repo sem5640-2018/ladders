@@ -48,7 +48,7 @@ namespace ladders.Controllers
         {
             if (id == null) return NotFound();
 
-            var profileModel = await _profileRepository.GetByIdAsync((int) id);
+            var profileModel = await _profileRepository.GetByUserIdAsync((int) id);
             if (profileModel == null) return NotFound();
             
             ViewBag.Rankings = null;
@@ -61,7 +61,7 @@ namespace ladders.Controllers
 
             ViewBag.OuststandingChallenges = _challengesRepository.GetOutstanding(profileModel.Id);
             
-            ViewBag.LastFiveMatch = _challengesRepository.GetResolved(profileModel.Id);
+            ViewBag.LastFiveMatch = _challengesRepository.GetResolved(profileModel.Id).Take(5);
 
             return View(profileModel);
         }

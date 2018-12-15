@@ -1,4 +1,5 @@
-﻿@model LadderModel
+﻿@using Humanizer
+@model LadderModel
 
 @{
     ViewData["Title"] = "Details";
@@ -9,7 +10,7 @@
         <div class="card">
             <div class="card-header">
                 <strong class="card-title">@(Model.Name) Ladder</strong>
-                <a asp-action="Index">Back to List</a>
+                <a class="btn btn-default" asp-action="Index">Back to List</a>
             </div>
             <div class="card-body">
                 <div>
@@ -18,11 +19,11 @@
                     <div>
                         @if (ViewBag.IsAdmin)
                         {
-                            <span><a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |</span>
+                            <span><a class="btn btn-default" asp-action="Edit" asp-route-id="@Model.Id">Edit</a> | <a class="btn btn-default" asp-action="Approval" asp-route-id="@Model.Id" >Approve Users</a></span>
                         }
                     </div>
 
-                    <hr />
+                    <br />
 
                     <table class="table">
                         <thead>
@@ -49,10 +50,10 @@
                                             @Html.DisplayFor(modelItem => item.Challengee.Name)
                                         </td>
                                         <td>
-                                            @Html.DisplayFor(modelItem => item.Created)
+                                            @(item.Created.Humanize())
                                         </td>
                                         <td>
-                                            @Html.DisplayFor(modelItem => item.ChallengedTime)
+                                            @(item.ChallengedTime.Humanize())
                                         </td>
                                     </tr>
                                 }
@@ -60,7 +61,7 @@
                         </tbody>
                     </table>
 
-                    <hr />
+                    <br />
 
                     <table class="table">
                         <thead>
@@ -79,7 +80,7 @@
                         <tbody>
                             @if (Model.CurrentRankings != null)
                             {
-                                foreach (var item in Model?.CurrentRankings.OrderByDescending(a => a.Position))
+                                foreach (Ranking item in Model?.CurrentRankings.OrderBy(a => a.Position))
                                 {
                                     if (item.User != null)
                                     {
@@ -116,5 +117,3 @@
         </div>
     </div>
 </div>
-
-
