@@ -6,6 +6,8 @@ namespace ladders.Models
     public class Booking
     {
         [Key]
+        public virtual int Id{ get; set; }
+
         public virtual int bookingId { get; set; }
 
         public virtual DateTime bookingDateTime { get; set; }

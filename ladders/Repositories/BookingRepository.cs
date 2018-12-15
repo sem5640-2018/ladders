@@ -33,7 +33,7 @@ namespace ladders.Repositories
 
         public async Task<Booking> AddAsync(Booking booking)
         {
-            _context.Booking.Add(booking);
+            await _context.Booking.AddAsync(booking);
             await _context.SaveChangesAsync();
             return booking;
         }
