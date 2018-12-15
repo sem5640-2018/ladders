@@ -7,19 +7,25 @@ using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace ladders.Controllers
 {
     [Authorize]
-    public class LaddersController : Controller
+    public class LaddersManController : Controller
     {
+        private readonly IApiClient _apiClient;
+        private readonly IConfigurationSection _appConfig;
         private readonly ILaddersRepository _laddersRepository;
         private readonly IChallengesRepository _challengesRepository;
         private readonly IProfileRepository _profileRepository;
 
-        public LaddersController(ILaddersRepository laddersRepository, IChallengesRepository challengesRepository,
+        public LaddersManController(IApiClient client, IConfiguration config, 
+            ILaddersRepository laddersRepository, IChallengesRepository challengesRepository,
             IProfileRepository profileRepository)
         {
+            _apiClient = client;
+            _appConfig = config.GetSection("ladders");
             _laddersRepository = laddersRepository;
             _challengesRepository = challengesRepository;
             _profileRepository = profileRepository;
@@ -56,6 +62,7 @@ namespace ladders.Controllers
             ViewBag.Me = me;
             ViewBag.IsAdmin = Helpers.AmIAdmin(User);
             ViewBag.challenges = _challengesRepository.GetByLadder(ladderModel);
+            ViewBag.ActiveChallenges = _challengesRepository.GetByLadderActive(ladderModel);
 
             return View(ladderModel);
         }
@@ -194,7 +201,7 @@ namespace ladders.Controllers
 
             if (id == null) return NotFound();
 
-            var ladderModel = await _laddersRepository.GetByIdIncAllAsync((int) id);
+            var ladderModel = await _laddersRepository.GetByIdIncAllAndUserRankAsync((int) id);
 
             if (ladderModel == null) return NotFound();
             return View(ladderModel);
@@ -274,7 +281,7 @@ namespace ladders.Controllers
         {
             if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
-            var user = await _profileRepository.FindByIdAsync(id);
+            var user = await _profileRepository.GetByUserIdAsync(id);
             if (user.CurrentRanking == null)
                 return RedirectToAction(nameof(Index));
 
@@ -282,6 +289,14 @@ namespace ladders.Controllers
 
             if (ladderModel == null)
                 return NotFound();
+
+            var currentChallenge = _challengesRepository.GetActiveUserChallenge(user);
+
+            if (currentChallenge != null)
+            {
+                currentChallenge = await _challengesRepository.UserConcedeChallenge(user, _apiClient, _appConfig.GetValue<string>("BookingFacilitiesUrl"), currentChallenge);
+                ladderModel = await _laddersRepository.UpdateLadder(currentChallenge);
+            }
 
             var rank = ladderModel.CurrentRankings.FirstOrDefault(a => a.User == user);
 
@@ -311,13 +326,6 @@ namespace ladders.Controllers
         #endregion
 
         #region Help Functions
-
-        private async Task<bool> AmIMember(LadderModel ladder) //TODO is it needed (remove comment if it is)
-        {
-            ProfileModel user = await _profileRepository.GetByUserIdAsync(Helpers.GetMyName(User));
-            return IsMember(user, ladder);
-        }
-
 
         private static bool IsMember(ProfileModel user, LadderModel ladder)
         {

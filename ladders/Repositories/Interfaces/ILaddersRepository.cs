@@ -28,7 +28,9 @@ namespace ladders.Repositories.Interfaces
 
         Ranking GetRankByIdAsync(LadderModel ladder, int userId);
 
-        Task UpdateLadder(Challenge challenge);
+        Task<LadderModel> UpdateLadder(Challenge challenge);
+
+        Task<List<LadderModel>> GetAllAsyncIncludes();
 
         bool Exists(int id);
     }

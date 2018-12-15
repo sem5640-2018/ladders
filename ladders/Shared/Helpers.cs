@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ladders.Models;
 using ladders.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace ladders.Shared
@@ -71,7 +69,7 @@ namespace ladders.Shared
 
         public static async Task<IEnumerable<Venue>> GetVenues(string bookingBaseUrl, IApiClient apiClient)
         {
-            var venueData = await apiClient.GetAsync($"{bookingBaseUrl}api/sports");
+            var venueData = await apiClient.GetAsync($"{bookingBaseUrl}api/venues");
 
             if (!venueData.IsSuccessStatusCode) return null;
 
@@ -104,7 +102,7 @@ namespace ladders.Shared
                 if (challenge.ChallengeeId != user.Id && challenge.ChallengerId != user.Id)
                     return false;
 
-                return challenge.Resolved;
+                return !challenge.Resolved;
             }
 
             return model.Where(Check).Any();
@@ -114,25 +112,20 @@ namespace ladders.Shared
         {
             var users = new Dictionary<string, bool>();
             var allChallenges = challenges.Where(a => a.Ladder == ladder).ToList();
-
-            var usersAbove = ladder.CurrentRankings.Where(a => a.Position < rank.Position);
-        
-            var enumerable = usersAbove.ToList();
+            var usersAbove = ladder.CurrentRankings.Where(a => a.Position < rank.Position).OrderByDescending(a => a.Position).ToList();      
             var added = 0;
-            for (var i = 1; i <= enumerable.Count(); i++)
+
+            foreach (var user in usersAbove)
             {
-                if (added == 5) return users;
-
-                var i1 = i;
-                var user = enumerable?.Where(a => a.Position == rank.Position - i1 && a.User != null && !a.User.Suspended)?.FirstOrDefault();
-
-                if (user?.User == null)
+                if (user?.User == null || user.User.Suspended)
                     continue;
 
                 if (IsUserInActiveChallenge(allChallenges, user.User)) continue;
 
                 users[user.User.Name] = true;
                 added++;
+
+                if (added == 5) return users;
             }
 
             return users;

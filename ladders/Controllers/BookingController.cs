@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using IdentityModel;
 using ladders.Models;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
@@ -17,12 +15,12 @@ namespace ladders.Controllers
     [Authorize]
     public class BookingController : ControllerBase
     {
-        private readonly IApiClient apiClient;
+        private readonly IApiClient _apiClient;
         private readonly IConfigurationSection _appConfig;
 
         public BookingController(IApiClient client, IConfiguration config)
         {
-            apiClient = client;
+            _apiClient = client;
             _appConfig = config.GetSection("ladders");
         }
 
@@ -30,34 +28,34 @@ namespace ladders.Controllers
         public async Task<IActionResult> GetTimes([FromRoute] DateTime date, [FromRoute] int venueId, [FromRoute] int sportId)
         {
             var dateToUse = date.ToString("yyyy-MM-dd");
-            var timeData = await apiClient.GetAsync($"{_appConfig.GetValue<string>("BookingFacilitiesUrl")}api/booking/{dateToUse}/{venueId}/{sportId}");
+            var timeData = await _apiClient.GetAsync($"{_appConfig.GetValue<string>("BookingFacilitiesUrl")}api/booking/{dateToUse}/{venueId}/{sportId}");
 
             if (!timeData.IsSuccessStatusCode)
             {
-                return (NoContent());
+                return NoContent();
             }
 
             var info = await timeData.Content.ReadAsStringAsync();
             var sports = JsonConvert.DeserializeObject<ICollection<DateTime>>(info);
 
-            return (Ok(sports));
+            return Ok(sports);
         }
 
         [HttpGet("getSportsByVenue/{id}")]
         public async Task<IActionResult> GetSport([FromRoute] int id)
         {
             var sportsData =
-                await apiClient.GetAsync(
+                await _apiClient.GetAsync(
                     $"{_appConfig.GetValue<string>("BookingFacilitiesUrl")}api/sports/getSportsByVenue/{id}");
             if (!sportsData.IsSuccessStatusCode)
             {
-                return (NoContent());
+                return NoContent();
             }
 
             var info = await sportsData.Content.ReadAsStringAsync();
             var sports = JsonConvert.DeserializeObject<ICollection<Sport>>(info);
 
-            return (Ok(sports));
+            return Ok(sports);
         }
     }
 }

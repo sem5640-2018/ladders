@@ -1,0 +1,137 @@
+﻿@using Humanizer
+@model LadderModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <strong class="card-title">@(Model.Name) Ladder</strong>
+            </div>
+            <div class="card-body">
+                <div>
+                    <h5>@(Model?.CurrentRankings?.Count ?? 0) members</h5>
+                    <hr/>
+                    <div>
+                        @if (ViewBag.IsAdmin)
+                        {
+                            <span><a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a> | <a class="btn btn-primary" asp-action="Approval" asp-route-id="@Model.Id">Approve Users</a>
+                                 | <a class="btn btn-primary" asp-action="Index">Back to List</a></span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <strong class="card-title">Current Rankings</strong>
+            </div>
+            <div class="card-body">
+                <div class="table-stats order-table ov-h">
+                    <table class="table table-hover table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Position</th>
+                            <th>Wins</th>
+                            <th>Draws</th>
+                            <th>Losses</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @if (Model.CurrentRankings != null)
+                        {
+                            foreach (Ranking item in Model?.CurrentRankings.OrderBy(a => a.Position))
+                            {
+                                if (item.User != null)
+                                {
+                                    <tr onclick="@("window.location.href='" + Url.Action("Details", "Profile", new {id = item.User.Id}) + "'")">
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.User.Name)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Position)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Wins)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Draws)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Losses)
+                                        </td>
+                                        <td>
+                                            @if (ViewBag.Challengable != null && ViewBag.Challengable.ContainsKey(item.User.Name))
+                                            {
+                                                <a href="@Url.Action("Create", "Challenges", new {userId = item.User.Id, ladderId = Model.Id})">Challenge</a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <strong class="card-title">Active Challenges</strong>
+            </div>
+            <div class="card-body">
+                <div class="table-stats order-table ov-h">
+
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Challenger</th>
+                            <th>Challenging</th>
+                            <th>Challenged</th>
+                            <th>Event Time</th>
+                            <th>Responded</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @if (ViewBag.ActiveChallenges != null)
+                        {
+                            foreach (Challenge item in ViewBag.ActiveChallenges)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Challenger.Name)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Challengee.Name)
+                                    </td>
+                                    <td>
+                                        @(item.Created.Humanize())
+                                    </td>
+                                    <td>
+                                        @(item.ChallengedTime.Humanize())
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Accepted)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

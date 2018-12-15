@@ -55,13 +55,21 @@ namespace ladders.Repositories
         {
             var ladder = await _context.LadderModel
                 .Include(m => m.CurrentRankings)
+                .ThenInclude(rank => rank.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            return ladder.CurrentRankings.ToList();
+            return ladder.CurrentRankings.OrderBy(rank => rank.Position).ToList();
         }
 
         public async Task<List<LadderModel>> GetAllAsync()
         {
             return await _context.LadderModel.ToListAsync();
+        }
+
+        public async Task<List<LadderModel>> GetAllAsyncIncludes()
+        {
+            return await _context.LadderModel.Include(l => l.CurrentRankings)
+                .ThenInclude(r => r.User)
+                .ToListAsync();
         }
 
         public async Task<LadderModel> AddAsync(LadderModel ladder)
@@ -85,14 +93,14 @@ namespace ladders.Repositories
             return ladder;
         }
 
-        public async Task UpdateLadder(Challenge challenge)
+        public async Task<LadderModel> UpdateLadder(Challenge challenge)
         {
             var ladderModel = challenge.Ladder;
 
             var challenger = ladderModel.CurrentRankings.FirstOrDefault(a => a.User == challenge.Challenger);
             var challengee = ladderModel.CurrentRankings.FirstOrDefault(a => a.User == challenge.Challengee);
 
-            if (challengee == null || challenger == null) return;
+            if (challengee == null || challenger == null) return ladderModel;
             
             switch (challenge.Result)
             {
@@ -114,6 +122,8 @@ namespace ladders.Repositories
             }
 
             await _context.SaveChangesAsync();
+
+            return ladderModel;
         }
 
         public Ranking GetRankByIdAsync(LadderModel ladder, int userId)

@@ -1,23 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
+using Hangfire;
+using Hangfire.MySql;
 using ladders.Models;
 using ladders.Repositories;
 using ladders.Repositories.Interfaces;
+using ladders.Services;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ladders
 {
@@ -75,6 +73,11 @@ namespace ladders
                     options.Scope.Add("offline_access");
                     options.ClaimActions.MapJsonKey("locale", "locale");
                     options.ClaimActions.MapJsonKey("user_type", "user_type");
+                })
+                .AddIdentityServerAuthentication("Bearer", options =>
+                {
+                    options.Authority = _appConfig.GetValue<string>("GatekeeperUrl");
+                    options.ApiName = _appConfig.GetValue<string>("ApiResourceName");
                 });
 
             services.AddAuthorization(options =>
@@ -90,10 +93,14 @@ namespace ladders
                 options.Conventions.AddPageRoute("/Ladders/Index", "");
             });
 
+            var connectionString = Configuration.GetConnectionString("LaddersContext");
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddDbContext<LaddersContext>(options =>
-                    options.UseMySql(Configuration.GetConnectionString("LaddersContext")));
+                    options.UseMySql(connectionString));
+            
+            services.AddHangfire(x => x.UseStorage(new MySqlStorage(connectionString, new MySqlStorageOptions())));
             
             if (!_environment.IsDevelopment())
             {
@@ -107,7 +114,6 @@ namespace ladders
                     }
                 });
             }
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -115,7 +121,9 @@ namespace ladders
         {
             if (env.IsDevelopment())
             {
+                app.UseHangfireDashboard();
                 app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
             }
             else
             {
@@ -131,20 +139,24 @@ namespace ladders
                 {
                     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
                 });
+                app.UseExceptionHandler("/Shared/Error");
                 app.UseHsts();
             }
 
+            app.UseHangfireServer();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseAuthentication();
-
+          
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Ladders}/{action=Index}/{id?}");
+                    template: "{controller=LaddersMan}/{action=Index}/{id?}");
             });
+
+            RecurringJob.AddOrUpdate<EmailManager>(es => es.SendScheduledEmails(), Cron.Weekly);
         }
         
         private void RunMigrations(IApplicationBuilder app)

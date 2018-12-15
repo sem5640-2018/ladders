@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ladders.Models;
 using ladders.Repositories.Interfaces;
 using ladders.Shared;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -46,7 +44,12 @@ namespace ladders.Controllers
 
             if (me == null)
                 return RedirectToAction("Create", "Profile");
-            
+
+            var challenges = _challengesRepository.GetByChallengee(me);
+            challenges.AddRange(_challengesRepository.GetByChallenger(me));
+
+            await ConcedeStaleChallanges(challenges);
+
             ViewBag.Challenged = _challengesRepository.GetByChallengee(me);
             ViewBag.Challenging = _challengesRepository.GetByChallenger(me);
             return View();
@@ -69,17 +72,17 @@ namespace ladders.Controllers
         // GET: Challenges/Create
         public async Task<IActionResult> Create(int? userId, int? ladderId)
         {
-            if (userId == null || ladderId == null) return NotFound();
+            if (userId == null || ladderId == null) return RedirectToAction(nameof(Index));
 
             var challengee = await _profileRepository.FindByIdAsync((int) userId);
             var ladder = await _laddersRepository.FindByIdAsync((int) ladderId);
             var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
-            if (challengee == null || ladder == null || me == null) return NotFound();
+            if (challengee == null || ladder == null || me == null) return RedirectToAction(nameof(Index));
 
             if (_challengesRepository.IsUserInActiveChallenge(me) ||
                 _challengesRepository.IsUserInActiveChallenge(challengee))
-                return NotFound();
+                return RedirectToAction(nameof(Index));
 
             var challenge = new Challenge
             {
@@ -307,6 +310,20 @@ namespace ladders.Controllers
             var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
             var isAdmin = Helpers.AmIAdmin(User);
             return challenge.Challenger == me || challenge.Challengee == me || !isAdmin;
+        }
+
+        public async Task ConcedeStaleChallanges(IEnumerable<Challenge> challenges)
+        {
+            foreach (var challenge in challenges)
+            {
+                if (!_challengesRepository.IsChallengeStale(challenge)) 
+                    continue;
+
+                var chal = await _challengesRepository.UpdateWinner(Winner.Challenger, _apiClient,
+                    _appConfig.GetValue<string>("CommsUrl"), challenge);
+
+                await _laddersRepository.UpdateLadder(chal);
+            }
         }
     }
 }
