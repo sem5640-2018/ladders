@@ -88,7 +88,7 @@
                                 {
                                     if (item.User != null)
                                     {
-                                        <tr onclick="@("window.location.href='" + Url.Action("Details","Profile", new{id =item.Id}) + "'")">
+                                        <tr onclick="@("window.location.href='" + Url.Action("Details","Profile", new{id =item.User.Id}) + "'")">
                                             <td>
                                                 @Html.DisplayFor(modelItem => item.User.Name)
                                             </td>

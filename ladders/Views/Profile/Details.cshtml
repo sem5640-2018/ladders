@@ -93,7 +93,7 @@
             </div>
             <div class="card-body">
                 <div class="table-stats order-table ov-h">
-                    <table class="table">
+                    <table class="table table-striped table-bordered">
                         <thead>
                         <tr>
                             <th>Description</th>
@@ -107,17 +107,9 @@
                             foreach (Challenge challenge in ViewBag.OuststandingChallenges)
                             {
                                 <tr>
-                                    @if (challenge.Challengee == Model)
-                                    {
-                                        <td>@Html.DisplayFor(modelItem => challenge.Challenger.Name) Challenged You</td>
-                                    }
-                                    else if (challenge.Challenger == Model)
-                                    {
-                                        <td>You Challenged @Html.DisplayFor(modelItem => challenge.Challengee.Name)</td>
-                                    }
-                                    
-                                    <td>@(challenge.ChallengedTime.Humanize())</td>
-                                    <td>@Html.DisplayFor(modelItem => challenge.Accepted)</td>
+                                    <td><small>@(challenge.Challenger.Name) challenged @(challenge.Challengee.Name)</small></td>                                   
+                                    <td><small>@(challenge.ChallengedTime.Humanize())</small></td>
+                                    <td><small>@Html.DisplayFor(modelItem => challenge.Accepted)</small></td>
                                 </tr>
                             }
                         }
