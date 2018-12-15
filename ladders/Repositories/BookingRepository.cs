@@ -33,8 +33,32 @@ namespace ladders.Repositories
 
         public async Task<Booking> AddAsync(Booking booking)
         {
-            _context.Booking.Update(booking);
+            booking = await SafeAddBooking(booking);
+            await _context.Booking.AddAsync(booking);
             await _context.SaveChangesAsync();
+            return await _context.Booking
+                .Include(b => b.facility)
+                .ThenInclude(f => f.sport)
+                .Include(b => b.facility)
+                .ThenInclude(f => f.venue)
+                .FirstOrDefaultAsync(b => b.bookingId == booking.bookingId);
+        }
+
+        public async Task<Booking> SafeAddBooking(Booking booking)
+        {
+            var sport = await _context.Sport.FirstOrDefaultAsync(a => a.sportId == booking.facility.sportId) ?? (await _context.Sport.AddAsync(booking.facility.sport)).Entity;
+
+            var venue = await _context.Venue.FirstOrDefaultAsync(a => a.venueId == booking.facility.venueId) ?? (await _context.Venue.AddAsync(booking.facility.venue)).Entity;
+
+            var facility = await _context.Facility.FirstOrDefaultAsync(a => a.facilityId == booking.facilityId) ?? (await _context.Facility.AddAsync(booking.facility)).Entity;
+
+            facility.sport = sport;
+            facility.venue = venue;
+
+            booking.facilityId = facility.facilityId;
+
+            _context.Facility.Update(facility);
+
             return booking;
         }
 

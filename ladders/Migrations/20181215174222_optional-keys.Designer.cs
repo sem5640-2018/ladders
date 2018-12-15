@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ladders.Models;
 
 namespace ladders.Migrations
 {
     [DbContext(typeof(LaddersContext))]
-    partial class LaddersContextModelSnapshot : ModelSnapshot
+    [Migration("20181215174222_optional-keys")]
+    partial class optionalkeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
