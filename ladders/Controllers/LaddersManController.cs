@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 namespace ladders.Controllers
 {
     [Authorize]
-    public class LaddersController : Controller
+    public class LaddersManController : Controller
     {
         private readonly IApiClient _apiClient;
         private readonly IConfigurationSection _appConfig;
@@ -20,7 +20,7 @@ namespace ladders.Controllers
         private readonly IChallengesRepository _challengesRepository;
         private readonly IProfileRepository _profileRepository;
 
-        public LaddersController(IApiClient client, IConfiguration config, 
+        public LaddersManController(IApiClient client, IConfiguration config, 
             ILaddersRepository laddersRepository, IChallengesRepository challengesRepository,
             IProfileRepository profileRepository)
         {

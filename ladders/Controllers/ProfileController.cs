@@ -184,7 +184,7 @@ namespace ladders.Controllers
             var userId = Helpers.GetMyName(User);
             var account = await _profileRepository.GetByUserIdAsync(userId);
             return account == null
-                ? RedirectToAction("Index", "Ladders")
+                ? RedirectToAction("Index", "LaddersMan")
                 : RedirectToAction("Details", new {id = account.Id});
         }
 
