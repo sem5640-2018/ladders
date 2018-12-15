@@ -91,7 +91,8 @@ namespace ladders.Controllers
                 Resolved = false,
                 Challenger = me,
                 Challengee = challengee,
-                Ladder = ladder
+                Ladder = ladder,
+                Result = Winner.Unresolved
             };
 
             var facilities = await Helpers.GetVenues(_appConfig.GetValue<string>("BookingFacilitiesUrl"), _apiClient);
