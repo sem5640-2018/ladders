@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ladders.Models;
 
 namespace ladders.Migrations
 {
     [DbContext(typeof(LaddersContext))]
-    partial class LaddersContextModelSnapshot : ModelSnapshot
+    [Migration("20181215173941_optional-key")]
+    partial class optionalkey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,9 +88,9 @@ namespace ladders.Migrations
 
                     b.Property<bool>("isBlock");
 
-                    b.Property<int?>("sportId");
+                    b.Property<int>("sportId");
 
-                    b.Property<int?>("venueId");
+                    b.Property<int>("venueId");
 
                     b.HasKey("facilityId");
 
@@ -226,11 +228,13 @@ namespace ladders.Migrations
                 {
                     b.HasOne("ladders.Models.Sport", "sport")
                         .WithMany()
-                        .HasForeignKey("sportId");
+                        .HasForeignKey("sportId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ladders.Models.Venue", "venue")
                         .WithMany()
-                        .HasForeignKey("venueId");
+                        .HasForeignKey("venueId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("ladders.Models.ProfileModel", b =>
