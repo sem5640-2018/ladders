@@ -63,37 +63,37 @@
 
     <script>
         function updateDateTime() {
-            document.getElementById("BookingDateTime").value = document.getElementById("BookingDateId").value + "T" + $("#timeDDL :selected").text();
+            document.getElementById("BookingDateTime").value = document.getElementById("BookingDateId").value + "T" + jQuery("#timeDDL :selected").text();
         }
         function updateSports() {
             document.getElementById("BookingDateId").value = document.getElementById("BookingDateTime").value = "";
-            $("#timeDDL").empty();
-            urlVenues = '@Url.Content("~/")' + "api/booking/getSportsByVenue" + '/' + $("#venueDDL").val();
+            jQuery("#timeDDL").empty();
+            urlVenues = '@Url.Content("~/")' + "api/booking/getSportsByVenue" + '/' + jQuery("#venueDDL").val();
 
 
-            $.ajax({
+            jQuery.ajax({
                 url: urlVenues,
                 success: function (json) {
                     var items = "";
-                    $.each(json, function (i, sport) {
+                    jQuery.each(json, function (i, sport) {
                         items += "<option value='" + sport.sportId + "'>" + sport.sportName + "</option>";
                     })
-                    $("#sportDDL").empty().html(items);
+                    jQuery("#sportDDL").empty().html(items);
                 }
             });
         }
         function getTimes() {
-            var urlBooking = '@Url.Content("~/")' + "api/booking/"  + document.getElementById("BookingDateId").value + "/" + $("#venueDDL").val() + "/" + $("#sportDDL").val();
-            $.ajax({
+            var urlBooking = '@Url.Content("~/")' + "api/booking/"  + document.getElementById("BookingDateId").value + "/" + jQuery("#venueDDL").val() + "/" + jQuery("#sportDDL").val();
+            jQuery.ajax({
                 url: urlBooking,
                 success: function (json) {
                     var times = "";
-                    $("#BookingTimeForm").show();
-                    $.each(json, function (i, time) {
+                    jQuery("#BookingTimeForm").show();
+                    jQuery.each(json, function (i, time) {
                         var dout = new Date(Date.parse(time));
                         times += "<option value='" + i + "'>" + ("0" + dout.getHours()).slice(-2) + ":00:00" + "</option>";
                     })
-                    $("#timeDDL").empty().html(times);
+                    jQuery("#timeDDL").empty().html(times);
                     updateDateTime();
                 }
             });
