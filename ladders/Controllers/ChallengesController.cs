@@ -175,8 +175,8 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,BookingId,ChallengedTime,Resolved,Result")]
-            Challenge challenge)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,ChallengedTime,Challenger,Challengee,Resolved,Result")]
+            Challenge challenge, [Bind("VenueId")] int venueId, [Bind("SportId")] int sportId)
         {
             if (id != challenge.Id) return NotFound();
 
@@ -184,6 +184,20 @@ namespace ladders.Controllers
 
             try
             {
+                challenge.ChallengeeId = challenge.Challengee.Id;
+                challenge.ChallengerId = challenge.Challenger.Id;
+
+                challenge.Challenger = null;
+                challenge.Challengee = null;
+
+                var booking = await MakeBooking(venueId, sportId, challenge.ChallengedTime);
+
+                if (booking == null)
+                    return View(challenge);
+
+                challenge.Created = DateTime.UtcNow;
+                await _bookingRepository.AddAsync(booking);
+                challenge.Booking = booking;
                 await _challengesRepository.UpdateAsync(challenge);
             }
             catch (DbUpdateConcurrencyException)
