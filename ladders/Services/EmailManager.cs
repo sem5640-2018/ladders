@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,20 +53,45 @@ namespace ladders.Services
         {
             var emailContent = new StringBuilder();
 
-            emailContent.AppendLine("Hi User,");
-            emailContent.AppendLine();
-            emailContent.AppendLine();
-            emailContent.AppendLine("This week there have been many different challenges.");
-            emailContent.AppendLine();
-            emailContent.AppendLine();
+            emailContent.AppendLine("Hi User, <br/>");
+            emailContent.AppendLine("<br/>");
+            emailContent.AppendLine("<br/>");
+            emailContent.AppendLine("    This week there have been many different challenges. <br/>");
+            emailContent.AppendLine("<br/>");
+            emailContent.AppendLine("<br/>");
 
             foreach (var ranking in ladderModel.CurrentRankings.OrderBy(a => a.Position))
             {
-                emailContent.AppendLine($"User {ranking.User.Name} is in position {ranking.Position}");
+                emailContent.AppendLine($"User {ranking.User.Name} is in position {ranking.Position} <br/>");
             }
             
-            emailContent.AppendLine();
-            emailContent.AppendLine();
+            emailContent.AppendLine("<br/>");
+            emailContent.AppendLine("<br/>");
+            emailContent.AppendLine("Aberfitness.biz");
+
+            return emailContent.ToString();
+        }
+
+        public static string GetNewChallengeEmail(Challenge challenge, bool forChallenger)
+        {
+            var emailContent = new StringBuilder();
+
+            emailContent.AppendLine($"Hi User, <br/>");
+            emailContent.AppendLine("<br/>");
+            emailContent.AppendLine("<br/>");
+            
+            emailContent.AppendLine(forChallenger
+                ? $"    You have challenged {challenge.Challengee.Name} <br/>"
+                : $"    You have been challenged by {challenge.Challenger.Name} <br/>");
+            emailContent.AppendLine("<br/>");
+            emailContent.AppendLine("<br/>");
+
+            emailContent.AppendLine($"Venue: {challenge.Booking.facility.venue.venueName} <br/>");
+            emailContent.AppendLine($"Sport: {challenge.Booking.facility.sport.sportName} <br/>");
+            emailContent.AppendLine($"DateTime: {challenge.ChallengedTime.ToString(CultureInfo.CurrentCulture)} <br/>");
+            
+            emailContent.AppendLine("<br/>");
+            emailContent.AppendLine("<br/>");
             emailContent.AppendLine("Aberfitness.biz");
 
             return emailContent.ToString();
