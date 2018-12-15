@@ -281,7 +281,7 @@ namespace ladders.Controllers
         {
             if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
-            var user = await _profileRepository.FindByIdAsync(id);
+            var user = await _profileRepository.GetByUserIdAsync(id);
             if (user.CurrentRanking == null)
                 return RedirectToAction(nameof(Index));
 
