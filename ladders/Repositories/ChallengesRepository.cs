@@ -143,7 +143,7 @@ namespace ladders.Repositories
                 return !challenge.Resolved;
             }
 
-            return _context.Challenge.Include(a => a.Challenger).Include(a => a.Challengee).Include(a => a.Ladder).FirstOrDefault(Check);
+            return _context.Challenge.Include(a => a.Challenger).Include(a => a.Challengee).Include(a => a.Ladder).ThenInclude(l => l.CurrentRankings).FirstOrDefault(Check);
         }
 
         public async Task<Challenge> UserConcedeChallenge(ProfileModel user, IApiClient apiClient, string bookingUri,

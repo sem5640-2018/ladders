@@ -52,18 +52,16 @@ namespace ladders.Repositories
             var venue = await _context.Venue.FirstOrDefaultAsync(a => a.venueId == booking.facility.venueId);
             var facility = await _context.Facility.FirstOrDefaultAsync(a => a.facilityId == booking.facilityId);
 
-            if (facility == null)
-            {
-                return booking;
-            }
-
             if (sport == null)
                 sport = (await _context.Sport.AddAsync(booking.facility.sport)).Entity;
 
             if (venue == null)
                 venue = (await _context.Venue.AddAsync(booking.facility.venue)).Entity;
 
-            facility = (await _context.Facility.AddAsync(booking.facility)).Entity;
+            if (facility == null)
+            {
+                return booking;
+            }
 
             facility.sport = sport;
             facility.venue = venue;
