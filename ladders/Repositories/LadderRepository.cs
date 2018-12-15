@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -101,23 +102,25 @@ namespace ladders.Repositories
             var challengee = ladderModel.CurrentRankings.FirstOrDefault(a => a.User == challenge.Challengee);
 
             if (challengee == null || challenger == null) return ladderModel;
-            
+            var topPos = Math.Max(challenger.Position, challengee.Position);
+            var bottomPos = Math.Min(challenger.Position, challengee.Position);
+
             switch (challenge.Result)
             {
                 case Winner.Challenger:
                 {
-                    var topPos = challengee.Position;
-
-                    challengee.Position = challenger.Position;
-                    challenger.Position = topPos;
-
                     challengee.Losses++;
                     challenger.Wins++;
+                    challenger.Position = bottomPos;
+                    challengee.Position = topPos;
+
                     break;
                 }
                 case Winner.Challengee:
                     challengee.Wins++;
                     challenger.Losses++;
+                    challenger.Position = topPos;
+                    challengee.Position = bottomPos;
                     break;
             }
 
