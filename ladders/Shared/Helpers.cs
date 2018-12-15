@@ -80,15 +80,11 @@ namespace ladders.Shared
         {
             var users = new Dictionary<string, bool>();
             var allChallenges = challenges.Where(a => a.Ladder == ladder).ToList();
-
-            var usersAbove = ladder.CurrentRankings.Where(a => a.Position < rank.Position);
-        
-            var enumerable = usersAbove.OrderByDescending(a => a.Position).ToList();
+            var usersAbove = ladder.CurrentRankings.Where(a => a.Position < rank.Position).OrderByDescending(a => a.Position).ToList();      
             var added = 0;
-            foreach (var user in enumerable)
-            {
-                if (added == 5) return users;
 
+            foreach (var user in usersAbove)
+            {
                 if (user?.User == null || user.User.Suspended)
                     continue;
 
@@ -96,6 +92,8 @@ namespace ladders.Shared
 
                 users[user.User.Name] = true;
                 added++;
+
+                if (added == 5) return users;
             }
 
             return users;

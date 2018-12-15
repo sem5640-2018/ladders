@@ -72,17 +72,17 @@ namespace ladders.Controllers
         // GET: Challenges/Create
         public async Task<IActionResult> Create(int? userId, int? ladderId)
         {
-            if (userId == null || ladderId == null) return NotFound();
+            if (userId == null || ladderId == null) return RedirectToAction(nameof(Index));
 
             var challengee = await _profileRepository.FindByIdAsync((int) userId);
             var ladder = await _laddersRepository.FindByIdAsync((int) ladderId);
             var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
-            if (challengee == null || ladder == null || me == null) return NotFound();
+            if (challengee == null || ladder == null || me == null) return RedirectToAction(nameof(Index));
 
             if (_challengesRepository.IsUserInActiveChallenge(me) ||
                 _challengesRepository.IsUserInActiveChallenge(challengee))
-                return NotFound();
+                return RedirectToAction(nameof(Index));
 
             var challenge = new Challenge
             {

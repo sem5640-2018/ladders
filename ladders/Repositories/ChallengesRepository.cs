@@ -140,7 +140,7 @@ namespace ladders.Repositories
                 if (challenge.ChallengeeId != user.Id && challenge.ChallengerId != user.Id)
                     return false;
 
-                return challenge.Resolved;
+                return !challenge.Resolved;
             }
 
             return _context.Challenge.Include(a => a.Ladder).FirstOrDefault(Check);
