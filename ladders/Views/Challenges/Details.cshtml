@@ -61,8 +61,8 @@
                     {
                         <div>
                             <a class="btn btn-success" asp-action="AcceptChallenge" asp-route-id="@Model.Id">Accept</a>
-                            <button class="btn btn-warning">Re-Organise</button>
-                            <button class="btn btn-danger">Concede</button>
+                            <a class="btn btn-warning" asp-action="Edit" asp-route-id="@Model.Id">Re-Organise</a>
+                            <a class="btn btn-danger" asp-action="Concede" asp-route-id="@Model.Id">Concede</a>
                         </div>
                     }
 
