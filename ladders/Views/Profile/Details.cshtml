@@ -6,11 +6,10 @@
 }
 
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-12">
         <div class="card">
             <div class="card-header">
                 <strong class="card-title">Profile Details</strong>
-                <a class="btn btn-default" asp-action="Index">Back to List</a>
             </div>
             <div class="card-body">
                 <div>
@@ -44,11 +43,14 @@
                     </dl>
                 </div>
                 <div>
-                    <a class="btn btn-default" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+                    <a class="btn btn-success" asp-action="Edit" asp-route-id="@Model.Id">Edit</a> | 
+                    <a class="btn btn-primary" asp-action="Index">Back to List</a>
                 </div>
             </div>
         </div>
     </div>
+</div>
+<div class="row">
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
@@ -66,13 +68,13 @@
                         <tbody>
                         @if (ViewBag.Rankings != null)
                         {
-                             foreach (Ranking ranking in ViewBag.Rankings)
-                             {
-                                 <tr>
-                                     <td>@Html.DisplayFor(modelItem => ranking.User.Name)</td>
-                                     <td>@Html.DisplayFor(modelItem => ranking.Position)</td>
-                                 </tr>
-                             }
+                            foreach (Ranking ranking in ViewBag.Rankings)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => ranking.User.Name)</td>
+                                    <td>@Html.DisplayFor(modelItem => ranking.Position)</td>
+                                </tr>
+                            }
                         }
                         else
                         {
@@ -84,8 +86,6 @@
             </div>
         </div>
     </div>
-</div>
-<div class="row">
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
@@ -107,7 +107,7 @@
                             foreach (Challenge challenge in ViewBag.OuststandingChallenges)
                             {
                                 <tr>
-                                    <td><small>@(challenge.Challenger.Name) challenged @(challenge.Challengee.Name)</small></td>                                   
+                                    <td><small>@(challenge.Challenger.Name) challenged @(challenge.Challengee.Name)</small></td>
                                     <td><small>@(challenge.ChallengedTime.Humanize())</small></td>
                                     <td><small>@Html.DisplayFor(modelItem => challenge.Accepted)</small></td>
                                 </tr>
@@ -151,12 +151,12 @@
                                     else if (challenge.Result == Winner.Draw)
                                     {
                                         <td>You Drew</td>
-                                    } 
+                                    }
                                     else
                                     {
                                         <td>You Lost</td>
                                     }
-                                
+
                                     <td>@Html.DisplayFor(modelItem => challenge.ChallengedTime)</td>
                                 </tr>
                             }
