@@ -140,7 +140,7 @@ namespace ladders.Repositories
                 if (challenge.ChallengeeId != user.Id && challenge.ChallengerId != user.Id)
                     return false;
 
-                return challenge.Resolved;
+                return !challenge.Resolved;
             }
 
             return _context.Challenge.Include(a => a.Ladder).FirstOrDefault(Check);
@@ -184,10 +184,10 @@ namespace ladders.Repositories
 
             if (challenge.Accepted)
             {
-                return (challenge.ChallengedTime > now.AddDays(7));
+                return challenge.ChallengedTime < now.AddDays(-7);
             }
 
-            return challenge.Created > now.AddDays(3);
+            return challenge.Created < now.AddDays(-3) || challenge.ChallengedTime < now;
         }
     }
 }

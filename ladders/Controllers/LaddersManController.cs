@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 namespace ladders.Controllers
 {
     [Authorize]
-    public class LaddersController : Controller
+    public class LaddersManController : Controller
     {
         private readonly IApiClient _apiClient;
         private readonly IConfigurationSection _appConfig;
@@ -20,7 +20,7 @@ namespace ladders.Controllers
         private readonly IChallengesRepository _challengesRepository;
         private readonly IProfileRepository _profileRepository;
 
-        public LaddersController(IApiClient client, IConfiguration config, 
+        public LaddersManController(IApiClient client, IConfiguration config, 
             ILaddersRepository laddersRepository, IChallengesRepository challengesRepository,
             IProfileRepository profileRepository)
         {
@@ -201,7 +201,7 @@ namespace ladders.Controllers
 
             if (id == null) return NotFound();
 
-            var ladderModel = await _laddersRepository.GetByIdIncAllAsync((int) id);
+            var ladderModel = await _laddersRepository.GetByIdIncAllAndUserRankAsync((int) id);
 
             if (ladderModel == null) return NotFound();
             return View(ladderModel);
@@ -281,7 +281,7 @@ namespace ladders.Controllers
         {
             if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
-            var user = await _profileRepository.FindByIdAsync(id);
+            var user = await _profileRepository.GetByUserIdAsync(id);
             if (user.CurrentRanking == null)
                 return RedirectToAction(nameof(Index));
 

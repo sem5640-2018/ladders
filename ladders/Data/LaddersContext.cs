@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using ladders.Models;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace ladders.Models
 {
@@ -14,12 +9,12 @@ namespace ladders.Models
         {
         }
 
-        public DbSet<ladders.Models.ProfileModel> ProfileModel { get; set; }
+        public DbSet<ProfileModel> ProfileModel { get; set; }
 
-        public DbSet<ladders.Models.LadderModel> LadderModel { get; set; }
+        public DbSet<LadderModel> LadderModel { get; set; }
 
-        public DbSet<ladders.Models.Challenge> Challenge { get; set; }
+        public DbSet<Challenge> Challenge { get; set; }
         
-        public DbSet<ladders.Models.Booking> Booking { get; set; }
+        public DbSet<Booking> Booking { get; set; }
     }
 }

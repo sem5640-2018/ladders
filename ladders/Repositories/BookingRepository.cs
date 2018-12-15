@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ladders.Models;
@@ -22,7 +23,7 @@ namespace ladders.Repositories
 
         public Task<Booking> GetByIdIncAsync(int id)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public async Task<List<Booking>> GetAllAsync()

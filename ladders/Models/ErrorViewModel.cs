@@ -1,5 +1,3 @@
-using System;
-
 namespace ladders.Models
 {
     public class ErrorViewModel
