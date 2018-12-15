@@ -153,7 +153,7 @@ namespace ladders
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Ladders}/{action=Index}/{id?}");
+                    template: "{controller=LaddersMan}/{action=Index}/{id?}");
             });
 
             RecurringJob.AddOrUpdate<EmailManager>(es => es.SendScheduledEmails(), Cron.Weekly);
