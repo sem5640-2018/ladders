@@ -64,24 +64,24 @@
         function updateDateTime() {
             document.getElementById("BookingDateTime").value = document.getElementById("BookingDateId").value +
                 "T" +
-                $("#timeDDL :selected").text();
+                jQuery("#timeDDL :selected").text();
         }
 
         function updateSports() {
             document.getElementById("BookingDateId").value = document.getElementById("BookingDateTime").value = "";
-            $("#timeDDL").empty();
-            urlVenues = '@Url.Content("~/")' + "api/booking/getSportsByVenue" + '/' + $("#venueDDL").val();
+            jQuery("#timeDDL").empty();
+            urlVenues = '@Url.Content("~/")' + "api/booking/getSportsByVenue" + '/' + jQuery("#venueDDL").val();
 
 
-            $.ajax({
+            jQuery.ajax({
                 url: urlVenues,
                 success: function(json) {
                     var items = "";
-                    $.each(json,
+                    jQuery.each(json,
                         function(i, sport) {
                             items += "<option value='" + sport.sportId + "'>" + sport.sportName + "</option>";
                         })
-                    $("#sportDDL").empty().html(items);
+                    jQuery("#sportDDL").empty().html(items);
                 }
             });
         }
@@ -91,15 +91,15 @@
                 "api/booking/" +
                 document.getElementById("BookingDateId").value +
                 "/" +
-                $("#venueDDL").val() +
+                jQuery("#venueDDL").val() +
                 "/" +
-                $("#sportDDL").val();
-            $.ajax({
+                jQuery("#sportDDL").val();
+            jQuery.ajax({
                 url: urlBooking,
                 success: function(json) {
                     var times = "";
-                    $("#BookingTimeForm").show();
-                    $.each(json,
+                    jQuery("#BookingTimeForm").show();
+                    jQuery.each(json,
                         function(i, time) {
                             var dout = new Date(Date.parse(time));
                             times += "<option value='" +
@@ -109,7 +109,7 @@
                                 ":00:00" +
                                 "</option>";
                         })
-                    $("#timeDDL").empty().html(times);
+                    jQuery("#timeDDL").empty().html(times);
                     updateDateTime();
                 }
             });
