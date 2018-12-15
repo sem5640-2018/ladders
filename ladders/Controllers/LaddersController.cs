@@ -201,7 +201,7 @@ namespace ladders.Controllers
 
             if (id == null) return NotFound();
 
-            var ladderModel = await _laddersRepository.GetByIdIncAllAsync((int) id);
+            var ladderModel = await _laddersRepository.GetByIdIncAllAndUserRankAsync((int) id);
 
             if (ladderModel == null) return NotFound();
             return View(ladderModel);
