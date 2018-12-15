@@ -67,7 +67,7 @@
 
                     <br />
 
-                    <table class="table">
+                    <table class="table table-hover table-bordered table-striped">
                         <thead>
                             <tr>
                                 <th>Ladder</th>
@@ -88,7 +88,7 @@
                                 {
                                     if (item.User != null)
                                     {
-                                        <tr>
+                                        <tr onclick="@("window.location.href='" + Url.Action("Details","Profile", new{id =item.Id}) + "'")">
                                             <td>
                                                 @Html.DisplayFor(modelItem => item.User.Name)
                                             </td>

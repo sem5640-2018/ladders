@@ -37,7 +37,7 @@ namespace ladders.Shared
 
         public static async Task<IEnumerable<Venue>> GetVenues(string bookingBaseUrl, IApiClient apiClient)
         {
-            var venueData = await apiClient.GetAsync($"{bookingBaseUrl}api/sports");
+            var venueData = await apiClient.GetAsync($"{bookingBaseUrl}api/facilities");
 
             if (!venueData.IsSuccessStatusCode) return null;
 
