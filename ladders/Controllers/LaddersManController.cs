@@ -303,7 +303,7 @@ namespace ladders.Controllers
             if (rank == null)
                 return NotFound();
 
-            var allLower = ladderModel.CurrentRankings.Where(a => a.Position > rank.Position);
+            var allLower = ladderModel.CurrentRankings.Where(a => a.Position > rank.Position && a.LadderModel.Id == ladderModel.Id);
             foreach (var ranking in allLower)
             {
                 ranking.Position--;
