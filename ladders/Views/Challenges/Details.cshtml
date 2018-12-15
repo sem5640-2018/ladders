@@ -68,7 +68,7 @@
 
                     @if (Model.ChallengedTime < DateTime.Now && Model.Accepted && !Model.Resolved)
                     {
-                        <form >
+                        <form asp-action="ConcedeConfirm">
                             <br/>
                             <h3>Let us know the result</h3>
                             <br/>
