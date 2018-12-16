@@ -190,6 +190,8 @@ namespace ladders.Controllers
                 challenge.Challenger = null;
                 challenge.Challengee = null;
 
+                await Helpers.FreeUpVenue(_appConfig.GetValue<string>("BookingFacilitiesUrl"), _apiClient, challenge.Booking.bookingId);
+
                 var booking = await MakeBooking(venueId, sportId, challenge.ChallengedTime);
 
                 if (booking == null)
