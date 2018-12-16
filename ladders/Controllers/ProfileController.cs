@@ -113,14 +113,19 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,
-            [Bind("Id,Name,UserId,Availability,PreferredLocation,Suspended,CurrentLadder")]
-            ProfileModel profileModel)
+        public async Task<IActionResult> Edit(int id, [FromForm] string PreferredLocation, [FromForm] bool Suspended, [FromForm] string Availability)
         {
-            if (id != profileModel.Id) return NotFound();
+            var profileModel = await _profileRepository.FindByIdAsync((int) id);
 
-            if (!ModelState.IsValid) return View(profileModel);
+            if (profileModel == null)
+            {
+                return NotFound();
+            }
 
+            profileModel.PreferredLocation = PreferredLocation;
+            profileModel.Suspended = Suspended;
+            profileModel.Availability = Availability;
+            
             if (!Helpers.AmIAdmin(User) && !profileModel.UserId.Equals(Helpers.GetMyName(User))) return NotFound();
 
             var activeChallenge = _challengesRepository.GetActiveUserChallenge(profileModel);

@@ -18,12 +18,17 @@ namespace ladders.Repositories
         
         public async Task<ProfileModel> FindByIdAsync(int id)
         {
-            return await _context.ProfileModel.FindAsync(id);
+            return await _context.ProfileModel
+                .Include(a => a.ApprovalLadder)
+                .Include(a => a.CurrentRanking)
+                .FirstOrDefaultAsync(a => a.Id == id);
         }
 
         public async Task<ProfileModel> GetByIdAsync(int id)
         {
             return await _context.ProfileModel
+                .Include(a => a.ApprovalLadder)
+                .Include(a => a.CurrentRanking)
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
