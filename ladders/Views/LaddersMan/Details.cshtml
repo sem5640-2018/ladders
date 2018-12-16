@@ -78,7 +78,7 @@
                                             @Html.DisplayFor(modelItem => item.Losses)
                                         </td>
                                         <td>
-                                            @if (!ViewBag.Suspended && ViewBag.Challengable != null && ViewBag.Challengable.ContainsKey(item.User.Name))
+                                            @if (!ViewBag?.Me?.Suspended && ViewBag.Challengable != null && ViewBag.Challengable.ContainsKey(item.User.Name))
                                             {
                                                 <a href="@Url.Action("Create", "Challenges", new {userId = item.User.Id, ladderId = Model.Id})">Challenge</a>
                                             }
