@@ -78,7 +78,7 @@ namespace ladders.Controllers
             var ladder = await _laddersRepository.FindByIdAsync((int) ladderId);
             var me = await _profileRepository.GetByUserIdIncAsync(Helpers.GetMyName(User));
 
-            if (challengee == null || ladder == null || me == null) return RedirectToAction(nameof(Index));
+            if (challengee == null || ladder == null || me == null || challengee.Suspended || me.Suspended) return RedirectToAction(nameof(Index));
 
             if (_challengesRepository.IsUserInActiveChallenge(me) ||
                 _challengesRepository.IsUserInActiveChallenge(challengee))
@@ -189,6 +189,8 @@ namespace ladders.Controllers
 
                 challenge.Challenger = null;
                 challenge.Challengee = null;
+
+                await Helpers.FreeUpVenue(_appConfig.GetValue<string>("BookingFacilitiesUrl"), _apiClient, challenge.Booking.bookingId);
 
                 var booking = await MakeBooking(venueId, sportId, challenge.ChallengedTime);
 

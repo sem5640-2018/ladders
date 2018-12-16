@@ -7,6 +7,7 @@
 <div class="card">
     <div class="card-header">
         <strong class="card-title">Ladder Approval</strong>
+        <a asp-action="Index" asp-route-id="@Model.Id">Go Back</a>
     </div>
     <div class="card-body">
         @foreach (var item in Model.ApprovalUsersList)
