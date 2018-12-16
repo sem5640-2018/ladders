@@ -175,17 +175,17 @@ namespace ladders.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ChallengedTime,Challenger,Challengee,Resolved,Result")]
-            Challenge challenge, [Bind("VenueId")] int venueId, [Bind("SportId")] int sportId)
+        public async Task<IActionResult> Edit(int id, [FromForm] DateTime ChallengedTime, [Bind("VenueId")] int venueId, [Bind("SportId")] int sportId)
         {
-            if (id != challenge.Id) return NotFound();
-
-            if (!ModelState.IsValid || await IsValid(challenge)) return View(challenge);
+            var challenge = await _challengesRepository.GetByIdIncDirectDecentAsync((int)id);
+            if (challenge == null)
+                return NotFound();
 
             try
             {
-                challenge.ChallengeeId = challenge.Challengee.Id;
-                challenge.ChallengerId = challenge.Challenger.Id;
+                challenge.ChallengedTime = ChallengedTime;
+                challenge.ChallengeeId = challenge.Challenger.Id;
+                challenge.ChallengerId = challenge.Challengee.Id;
 
                 challenge.Challenger = null;
                 challenge.Challengee = null;
