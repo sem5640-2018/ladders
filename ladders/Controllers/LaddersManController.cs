@@ -256,8 +256,10 @@ namespace ladders.Controllers
         {
             if (!Helpers.AmIAdmin(User)) return Unauthorized();
 
-            var ladderModel = await _laddersRepository.FindByIdAsync(id);
-            await _laddersRepository.DeleteAsync(ladderModel);
+            var ladderModel = await _laddersRepository.GetAllForDeleteAsync(id);
+            var challenges =  _challengesRepository.GetByLadder(ladderModel);
+
+            await _laddersRepository.DeleteAsync(ladderModel, challenges);
 
             return RedirectToAction(nameof(Index));
         }
