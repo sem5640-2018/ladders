@@ -45,6 +45,17 @@ namespace ladders.Repositories
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
+        public async Task<LadderModel> GetAllForDeleteAsync(int id)
+        {
+            return await _context.LadderModel
+                .Include(ladder => ladder.ApprovalUsersList)
+                .Include(ladder => ladder.CurrentRankings)
+                .ThenInclude(a => a.User)
+                .Include(ladder => ladder.CurrentRankings)
+                .ThenInclude(a => a.Challenges)
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
         public async Task<LadderModel> GetByIdIncApprovedAsync(int id)
         {
             return await _context.LadderModel
@@ -87,8 +98,17 @@ namespace ladders.Repositories
             return ladder;
         }
 
-        public async Task<LadderModel> DeleteAsync(LadderModel ladder)
+        public async Task<LadderModel> DeleteAsync(LadderModel ladder, IEnumerable<Challenge> allChallenges)
         {
+            foreach (var rank in ladder.CurrentRankings)
+            {
+                rank.User.CurrentRanking = null;
+                rank.LadderModel = null;
+                rank.LadderModelId = null;
+            }
+
+            _context.Challenge.RemoveRange(allChallenges);
+            _context.Ranking.RemoveRange(ladder.CurrentRankings);
             _context.LadderModel.Remove(ladder);
             await _context.SaveChangesAsync();
             return ladder;
